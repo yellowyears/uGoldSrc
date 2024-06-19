@@ -2,11 +2,14 @@
   "name": "com.yellowyears.ugoldsrc",
   "version": "1.0.0",
   "displayName": "uGoldSrc",
-  "description": "uGoldSrc is a tool used to import GoldSource files into Unity.",
+  "description": "uGoldSrc is a tool used to import GoldSource files into Unity. ",
   "unity": "2021.3",
   "unityRelease": "16f1",
+  "documentationUrl": "https://github.com/yellowyears/uGoldSrc/blob/main/README.md",
+  "licensesUrl": "https://github.com/yellowyears/uGoldSrc/blob/main/LICENSE",
   "author": {
     "name": "yellowyears",
     "url": "https://github.com/yellowyears"
-  }
+  },
+  "hideInEditor": false
 }
