@@ -1,0 +1,12 @@
+fileFormatVersion: 2
+guid: f541fd5684e33144aa061b06624cb08b
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - lightsRad: {fileID: 11400000, guid: f843dc2cde5e01947b74bd579c29033d, type: 2}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

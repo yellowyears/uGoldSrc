@@ -1,0 +1,28 @@
+.settings-section {
+    background-color: var(--unity-colors-box-background);
+    margin-left: 5px;
+    margin-right: 5px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    padding-left: 5px;
+    padding-right: 5px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    border-top-left-radius: 10px;
+    border-bottom-left-radius: 10px;
+    border-top-right-radius: 10px;
+    border-bottom-right-radius: 10px;
+}
+
+.settings-section-header {
+    margin-left: 3px;
+    margin-right: 3px;
+    margin-top: 1px;
+    margin-bottom: 1px;
+    font-size: 14px;
+    -unity-font-style: bold;
+}
+
+.settings-section-option {
+    padding-right: 5px;
+}

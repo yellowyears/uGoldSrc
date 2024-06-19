@@ -1,0 +1,18 @@
+{
+    "name": "yellowyears.uGoldSrc.Editor",
+    "rootNamespace": "yellowyears.uGoldSrc.Editor",
+    "references": [
+        "GUID:d758beca871f9aa4a81557c37e4c21c2"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

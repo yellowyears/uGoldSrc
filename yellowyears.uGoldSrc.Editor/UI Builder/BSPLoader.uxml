@@ -1,0 +1,20 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="True">
+    <Style src="project://database/Assets/uGoldSrc/yellowyears.uGoldSrc.Editor/UI%20Builder/USS/BSPInspector.uss?fileID=7433441132597879392&amp;guid=378d23d896297c24288485979127c335&amp;type=3#BSPInspector" />
+    <ui:IMGUIContainer>
+        <ui:VisualElement name="GameSettings" class="settings-section">
+            <ui:Label text="Game Settings" display-tooltip-when-elided="true" class="settings-section-header" />
+            <ui:TextField picking-mode="Ignore" label="Mod Name" binding-path="modName" name="ModName" tooltip="Name of the folder that contains the map files" class="settings-section-option" />
+            <ui:TextField picking-mode="Ignore" label="Root Path" binding-path="rootPath" name="RootPath" tooltip="Root path of your game&apos;s install (containing the .exe)" class="settings-section-option" />
+        </ui:VisualElement>
+        <ui:VisualElement name="BSPSettings" class="settings-section">
+            <ui:Label text="BSP Settings" display-tooltip-when-elided="true" class="settings-section-header" />
+            <uie:FloatField label="Unit Scale" binding-path="unitScale" name="UnitScale" tooltip="Scale mulitplier for the imported map" class="settings-section-option" />
+            <uie:EnumField label="Texture Filter Mode" binding-path="textureFilterMode" type="UnityEngine.FilterMode, UnityEngine.CoreModule" name="TextureFilterMode" value="Point" tooltip="The texture filtering mode that will be set on all imported textures" class="settings-section-option" />
+            <uie:EnumField label="Skybox Filter Mode" binding-path="skyboxFilterMode" type="UnityEngine.FilterMode, UnityEngine.CoreModule" name="SkyboxFilterMode" value="Bilinear" tooltip="The texture filtering mode that will be set on all imported skyboxes" class="settings-section-option" />
+            <ui:TextField picking-mode="Ignore" label="Map Name" binding-path="mapName" name="MapName" tooltip="The name of the map you want to import" class="settings-section-option">
+                <ui:Label text=".bsp" display-tooltip-when-elided="true" style="margin-left: 5px;" />
+            </ui:TextField>
+            <ui:Button text="Load BSP Map" display-tooltip-when-elided="true" max-length="100" name="LoadBSP" class="settings-section-option" />
+        </ui:VisualElement>
+    </ui:IMGUIContainer>
+</ui:UXML>

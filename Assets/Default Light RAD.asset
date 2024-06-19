@@ -1,0 +1,111 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7c3abaa61cea23144ad48798a67eb81d, type: 3}
+  m_Name: Default Light RAD
+  m_EditorClassIdentifier: 
+  Entries:
+  - TextureName: +0~GENERIC65
+    LightColour: {r: 1, g: 1, b: 1, a: 750}
+  - TextureName: +0~GENERIC85
+    LightColour: {r: 1, g: 1, b: 1, a: 20000}
+  - TextureName: +0~GENERIC86
+    LightColour: {r: 1, g: 1, b: 1, a: 10000}
+  - TextureName: +0~GENERIC86B
+    LightColour: {r: 1, g: 1, b: 1, a: 20000}
+  - TextureName: +0~GENERIC86R
+    LightColour: {r: 1, g: 1, b: 1, a: 60000}
+  - TextureName: GENERIC87A
+    LightColour: {r: 1, g: 1, b: 1, a: 1000}
+  - TextureName: GENERIC88A
+    LightColour: {r: 1, g: 1, b: 1, a: 1000}
+  - TextureName: GENERIC89A
+    LightColour: {r: 1, g: 1, b: 1, a: 1000}
+  - TextureName: GENERIC90A
+    LightColour: {r: 1, g: 1, b: 1, a: 1000}
+  - TextureName: GENERIC105
+    LightColour: {r: 1, g: 1, b: 1, a: 1000}
+  - TextureName: GENERIC106
+    LightColour: {r: 1, g: 1, b: 1, a: 1000}
+  - TextureName: GENERIC107
+    LightColour: {r: 1, g: 1, b: 1, a: 1000}
+  - TextureName: GEN_VEND1
+    LightColour: {r: 1, g: 1, b: 1, a: 1000}
+  - TextureName: EMERGLIGHT
+    LightColour: {r: 1, g: 1, b: 1, a: 50000}
+  - TextureName: +0~FIFTS_LGHT01
+    LightColour: {r: 1, g: 1, b: 1, a: 4000}
+  - TextureName: +0~FIFTIES_LGT2
+    LightColour: {r: 1, g: 1, b: 1, a: 5000}
+  - TextureName: +0~FIFTS_LGHT4
+    LightColour: {r: 1, g: 1, b: 1, a: 4000}
+  - TextureName: +0~LIGHT1
+    LightColour: {r: 1, g: 1, b: 1, a: 3000}
+  - TextureName: +0~LIGHT3A
+    LightColour: {r: 1, g: 1, b: 1, a: 10000}
+  - TextureName: +0~LIGHT4A
+    LightColour: {r: 1, g: 1, b: 1, a: 11000}
+  - TextureName: +0~LIGHT5A
+    LightColour: {r: 1, g: 1, b: 1, a: 10000}
+  - TextureName: +0~LIGHT6A
+    LightColour: {r: 1, g: 1, b: 1, a: 25000}
+  - TextureName: +0~TNNL_LGT1
+    LightColour: {r: 1, g: 1, b: 1, a: 10000}
+  - TextureName: +0~TNNL_LGT2
+    LightColour: {r: 1, g: 1, b: 1, a: 12000}
+  - TextureName: +0~TNNL_LGT3
+    LightColour: {r: 1, g: 1, b: 1, a: 17000}
+  - TextureName: +0~TNNL_LGT4
+    LightColour: {r: 1, g: 1, b: 1, a: 10000}
+  - TextureName: +0LAB1_W6D
+    LightColour: {r: 1, g: 1, b: 1, a: 4000}
+  - TextureName: +0LAB1_W6
+    LightColour: {r: 1, g: 1, b: 1, a: 8800}
+  - TextureName: +0LAB1_W7
+    LightColour: {r: 1, g: 1, b: 1, a: 4000}
+  - TextureName: SKKYLITE
+    LightColour: {r: 1, g: 1, b: 1, a: 1000}
+  - TextureName: +0~DRKMTLS1
+    LightColour: {r: 1, g: 1, b: 1, a: 6000}
+  - TextureName: +0~DRKMTLGT1
+    LightColour: {r: 1, g: 1, b: 1, a: 6000}
+  - TextureName: +0~DRKMTLS2
+    LightColour: {r: 1, g: 1, b: 1, a: 30000}
+  - TextureName: +0~DRKMTLS2C
+    LightColour: {r: 1, g: 1, b: 1, a: 50000}
+  - TextureName: +0DRKMTL_SCRN
+    LightColour: {r: 1, g: 1, b: 1, a: 10000}
+  - TextureName: ~LAB_CRT9A
+    LightColour: {r: 1, g: 1, b: 1, a: 100}
+  - TextureName: ~LAB_CRT9B
+    LightColour: {r: 1, g: 1, b: 1, a: 100}
+  - TextureName: ~LAB_CRT9C
+    LightColour: {r: 1, g: 1, b: 1, a: 100}
+  - TextureName: ~LIGHT3A
+    LightColour: {r: 1, g: 1, b: 1, a: 3000}
+  - TextureName: ~LIGHT3B
+    LightColour: {r: 1, g: 1, b: 1, a: 2000}
+  - TextureName: ~LIGHT3C
+    LightColour: {r: 1, g: 1, b: 1, a: 2500}
+  - TextureName: ~LIGHT3E
+    LightColour: {r: 1, g: 1, b: 1, a: 6000}
+  - TextureName: C1A3C_MAP
+    LightColour: {r: 1, g: 1, b: 1, a: 100}
+  - TextureName: FIFTIES_MON1B
+    LightColour: {r: 1, g: 1, b: 1, a: 30}
+  - TextureName: +0~LAB_CRT8
+    LightColour: {r: 1, g: 1, b: 1, a: 100}
+  - TextureName: ELEV2_CIEL
+    LightColour: {r: 1, g: 1, b: 1, a: 800}
+  - TextureName: YELLOW
+    LightColour: {r: 1, g: 1, b: 1, a: 2000}
+  - TextureName: RED
+    LightColour: {r: 1, g: 1, b: 1, a: 1000}
