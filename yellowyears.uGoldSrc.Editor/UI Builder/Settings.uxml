@@ -1,7 +1,7 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="True">
     <ui:VisualElement>
         <ui:Label text="Shaders" display-tooltip-when-elided="true" style="-unity-font-style: bold; font-size: 15px;" />
-        <uie:ObjectField label="Default Shader" allow-scene-objects="false" binding-path="defaultShader" type="UnityEngine.Shader, UnityEngine" />
+        <uie:ObjectField label="Lit Shader" allow-scene-objects="false" binding-path="litShader" type="UnityEngine.Shader, UnityEngine" />
         <ui:Label text="Map Layers and Static Flags" display-tooltip-when-elided="true" style="font-size: 15px; -unity-font-style: bold;" />
         <uie:LayerField label="Trigger Layer" binding-path="triggerLayer" />
         <uie:LayerField label="Static Layer" binding-path="staticLayer" />
@@ -9,6 +9,6 @@
         <uie:PropertyField binding-path="nonStaticEntityClassNames" />
         <ui:Label text="Lighting" display-tooltip-when-elided="true" style="font-size: 15px; -unity-font-style: bold;" />
         <uie:ObjectField label="Light RAD" type="yellowyears.uGoldSrc.Formats.RAD.Importer.RAD, yellowyears.uGoldSrc" binding-path="lightsRad" allow-scene-objects="false" />
-        <uie:IntegerField label="Light Intensity Scale" binding-path="lightIntensityScale" />
+        <uie:FloatField label="Light Intensity Scale" binding-path="lightIntensityScale" />
     </ui:VisualElement>
 </ui:UXML>

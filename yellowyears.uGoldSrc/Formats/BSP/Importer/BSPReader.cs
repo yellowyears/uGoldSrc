@@ -181,13 +181,17 @@ namespace yellowyears.uGoldSrc.Formats.BSP.Importer
                 var splitWadFilePath = wadFilePaths[i].Split(new char[] { '\\', '/' }, StringSplitOptions.RemoveEmptyEntries);
                 if (splitWadFilePath.Length >= 2)
                 {
-                    if (splitWadFilePath[splitWadFilePath.Length - 2] == "barney")
+                    // WAD Aliases prevent any errors where the name of the WAD in the worldspawn entity is different to what it is called in the install
+                    var wadFolderName = splitWadFilePath[splitWadFilePath.Length - 2];
+                    var wadFolderAlias = Settings.Instance.wadFolderAliases.Where(x => x.originalFolderName == wadFolderName).FirstOrDefault();
+
+                    if (wadFolderAlias != null)
                     {
-                        // Temporary fix for incorrect folder name in worldspawn
-                        splitWadFilePath[splitWadFilePath.Length - 2] = "bshift";
+                        wadFolderName = wadFolderAlias.actualFolderName;
                     }
 
-                    wadFilePaths[i] = splitWadFilePath[splitWadFilePath.Length - 2] + "\\" + splitWadFilePath[splitWadFilePath.Length - 1];
+                    // Set the wad's filepath to be the wad folder and the wad name
+                    wadFilePaths[i] = wadFolderName + "\\" + splitWadFilePath[splitWadFilePath.Length - 1];
                 }
                 else
                 {
