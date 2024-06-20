@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Rendering;
 using yellowyears.uGoldSrc.Formats.RAD.Importer;
 
 #if UNITY_EDITOR
@@ -50,6 +51,15 @@ namespace yellowyears.uGoldSrc
 
         private static void SetDefaultValues()
         {
+            if(GraphicsSettings.defaultRenderPipeline == null)
+            {
+                _instance.litShader = Shader.Find("Standard");
+            }
+            else
+            {
+                _instance.litShader = GraphicsSettings.defaultRenderPipeline.defaultShader;
+            }
+
             _instance.triggerEntityClassNames = new string[] { "trigger_auto", "trigger_autosave", "trigger_camera", "trigger_cdaudio", "trigger_changelevel", "trigger_changetarget", "trigger_counter", "trigger_endsection", "trigger_gravity", "trigger_hurt", "trigger_monsterjump", "trigger_multiple", "trigger_once", "trigger_push", "trigger_relay", "trigger_teleport", "trigger_transition", "func_ladder", "func_friction" };
             _instance.nonStaticEntityClassNames = new string[] { "func_rotating", "func_door", "func_door_rotating", "func_platrot", "func_pushable" };
 
@@ -62,7 +72,13 @@ namespace yellowyears.uGoldSrc
             _instance.lightIntensityScale = 0.05f;
         }
 
-        [Header("Map Layers and Static Flags")]
+        #region Shaders
+
+        public Shader litShader;
+
+        #endregion
+
+        #region Map Layers and Static Flags
 
         public int triggerLayer;
         public int staticLayer;
@@ -70,11 +86,15 @@ namespace yellowyears.uGoldSrc
         public string[] triggerEntityClassNames;
         public string[] nonStaticEntityClassNames;
 
-        [Header("Lighting")]
+        #endregion
+
+        #region Lighting
 
         public RAD lightsRad;
 
         public float lightIntensityScale;
+
+        #endregion
 
     }
 }

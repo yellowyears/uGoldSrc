@@ -145,7 +145,7 @@ namespace yellowyears.uGoldSrc
                 var shader = isRadTexture ? "SLZ/LitMAS/LitMAS Standard" : "Universal Render Pipeline/Lit (PBR Workflow)";
 
                 // Create the material from scratch as it could used in and outside of the save and load
-                var material = new Material(Shader.Find(shader));
+                var material = new Material(Settings.Instance.litShader);
                 material.mainTexture = texture; // This texture could come from the mipTexture, but it is better to use a texture returned from GetTexture()
                 material.name = texture.name;
 
