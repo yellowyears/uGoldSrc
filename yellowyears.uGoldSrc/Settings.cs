@@ -60,6 +60,8 @@ namespace yellowyears.uGoldSrc
             {
                 _instance.litShader = GraphicsSettings.defaultRenderPipeline.defaultShader;
             }
+            
+            _instance.skyboxShader = Shader.Find("Skybox/Cubemap");
 
             _instance.wadFolderAliases = new NameAlias[] { new NameAlias("barney", "bshift") };
 
@@ -117,6 +119,5 @@ namespace yellowyears.uGoldSrc
                 this.actualFolderName = actualFolderName;
             }
         }
-
     }
 }

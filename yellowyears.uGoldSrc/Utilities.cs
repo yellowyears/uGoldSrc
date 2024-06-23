@@ -139,11 +139,6 @@ namespace yellowyears.uGoldSrc
             }
             else
             {
-                var radEntry = Settings.Instance.lightsRad.Entries.Where(x => x.TextureName.ToLower() == texture.name.ToLower()).FirstOrDefault();
-                var isRadTexture = radEntry != null;
-
-                var shader = isRadTexture ? "SLZ/LitMAS/LitMAS Standard" : "Universal Render Pipeline/Lit (PBR Workflow)";
-
                 // Create the material from scratch as it could used in and outside of the save and load
                 var material = new Material(Settings.Instance.litShader);
                 material.mainTexture = texture; // This texture could come from the mipTexture, but it is better to use a texture returned from GetTexture()
@@ -156,14 +151,6 @@ namespace yellowyears.uGoldSrc
                     material.SetFloat("_AlphaClip", 1);
                     material.SetFloat("_Cutoff", 1);
                 }
-
-                //if (isRadTexture)
-                //{
-                //    material.SetFloat("_Emission", 1);
-                //    material.SetFloat("_BakedMutiplier", 1);
-                //    material.SetColor("_EmissionColor", new Color(radEntry.LightColour.r, radEntry.LightColour.g, radEntry.LightColour.b, 30));
-                //    material.globalIlluminationFlags = MaterialGlobalIlluminationFlags.BakedEmissive;
-                //}
 
                 // Else, we need to save the new material at the same path
                 if (!Directory.Exists(saveAndLoadPath))
@@ -202,8 +189,8 @@ namespace yellowyears.uGoldSrc
             else
             {
                 // Create the material from scratch
-                var material = new Material(Shader.Find("SLZ/Simple Geo Skybox"));
-                material.SetTexture("_BaseMap", skyboxCubemap);
+                var material = new Material(Settings.Instance.skyboxShader);
+                material.mainTexture = skyboxCubemap;
                 material.name = skyboxCubemap.name;
 
                 // Else, we need to save the new material at the same path

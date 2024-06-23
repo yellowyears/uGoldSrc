@@ -2,6 +2,9 @@
     <ui:VisualElement>
         <ui:Label text="Shaders" display-tooltip-when-elided="true" style="-unity-font-style: bold; font-size: 15px;" />
         <uie:ObjectField label="Lit Shader" allow-scene-objects="false" binding-path="litShader" type="UnityEngine.Shader, UnityEngine" />
+        <uie:ObjectField label="Skybox Shader" allow-scene-objects="false" binding-path="skyboxShader" type="UnityEngine.Shader, UnityEngine" />
+        <ui:Label text="Import Settings" display-tooltip-when-elided="true" style="font-size: 15px; -unity-font-style: bold;" />
+        <uie:PropertyField binding-path="wadFolderAliases" />
         <ui:Label text="Map Layers and Static Flags" display-tooltip-when-elided="true" style="font-size: 15px; -unity-font-style: bold;" />
         <uie:LayerField label="Trigger Layer" binding-path="triggerLayer" />
         <uie:LayerField label="Static Layer" binding-path="staticLayer" />
