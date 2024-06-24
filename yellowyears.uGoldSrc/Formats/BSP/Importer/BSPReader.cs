@@ -307,11 +307,11 @@ namespace yellowyears.uGoldSrc.Formats.BSP.Importer
             Debug.Log(lightmapLump.HeaderEntry.Offset);
             Debug.Log(lightmapLump.HeaderEntry.Length);
 
-            Color32[] lightmapPixels = new Color32[lightmapLump.HeaderEntry.Length % 3];
+            Color32[] lightmapPixels = new Color32[lightmapLump.HeaderEntry.Length / 3];
 
             for(int i = 0; i < lightmapPixels.Length; i++)
             {
-                //lightmapPixels[i] = new Color32(Convert.ToInt32(_reader.ReadByte()), _reader.ReadByte(), _reader.ReadByte());
+                lightmapPixels[i] = new Color32(reader.ReadByte(), reader.ReadByte(), reader.ReadByte(), 255);
             }
 
             return lightmapLump;

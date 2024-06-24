@@ -77,7 +77,7 @@ namespace yellowyears.uGoldSrc.Formats.BSP.Importer
 #endif
 
             watch.Stop();
-            Debug.Log($"uGoldSrc: Finished reading {mapName} in {watch.ElapsedMilliseconds / 1000}s");
+            Debug.Log($"uGoldSrc: Finished reading {mapName} in {watch.ElapsedMilliseconds}ms");
         }
 
         private void SetupGroups()

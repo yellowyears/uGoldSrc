@@ -125,9 +125,6 @@ namespace yellowyears.uGoldSrc.Components
                     Transform parent = null;
                     string meshName = "Combined Mesh";
 
-                    var isTrigger = false;
-                    var isStatic = false;
-
                     for(int j = 0; j < combine.Length; j++)
                     {
                         originalMeshCount++;
@@ -137,9 +134,6 @@ namespace yellowyears.uGoldSrc.Components
 
                         parent = entry.Value[j].transform.parent;
                         meshName = entry.Value[j].name;
-
-                        isTrigger = entry.Value[j].gameObject.layer == Settings.Instance.triggerLayer;
-                        isStatic = entry.Value[j].gameObject.isStatic;
 
                         DestroyImmediate(entry.Value[j].gameObject);
                     }
@@ -156,18 +150,6 @@ namespace yellowyears.uGoldSrc.Components
 
                     var combinedMeshRenderer = combinedMeshObject.AddComponent<MeshRenderer>();
                     combinedMeshRenderer.sharedMaterial = entry.Key;
-
-                    combinedMeshObject.isStatic = isStatic;
-
-                    if(isTrigger)
-                    {
-                        combinedMeshObject.layer = Settings.Instance.triggerLayer;
-                        combinedMeshRenderer.enabled = false;
-                    }
-                    else if (isStatic)
-                    {
-                        combinedMeshObject.layer = Settings.Instance.staticLayer;
-                    }
 
                     combinedMeshObject.transform.parent = parent;
 
