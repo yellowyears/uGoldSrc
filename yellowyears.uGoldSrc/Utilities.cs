@@ -144,13 +144,16 @@ namespace yellowyears.uGoldSrc
                 material.mainTexture = texture; // This texture could come from the mipTexture, but it is better to use a texture returned from GetTexture()
                 material.name = texture.name;
 
-                // { = Masked/Transparent Textures 
+                // { = Masked/Transparent Textures
                 if (material.name.StartsWith("{"))
                 {
                     // Enable alpha clipping on the material
                     material.SetFloat("_AlphaClip", 1);
                     material.SetFloat("_Cutoff", 1);
                 }
+
+                material.SetFloat("_Smoothness", 0);
+                material.SetFloat("_Glossiness", 0);
 
                 // Else, we need to save the new material at the same path
                 if (!Directory.Exists(saveAndLoadPath))

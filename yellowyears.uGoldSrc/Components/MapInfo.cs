@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using UnityEngine;
 
@@ -21,10 +20,7 @@ namespace yellowyears.uGoldSrc.Components
         #endregion
 
         public List<GameObject> models = new List<GameObject>();
-
         public List<EntityInfo> entityInfos = new List<EntityInfo>();
-
-        public List<MeshFilter> combinedMeshFilters = new List<MeshFilter>();
 
         public void SetLayersAndFlags()
         {
@@ -156,8 +152,6 @@ namespace yellowyears.uGoldSrc.Components
 #if UNTIY_EDITOR
                     EditorUtility.SetDirty(combinedMeshObject);
 #endif
-
-                    combinedMeshFilters.Add(combinedMeshFilter);
                 }
             }
 
@@ -169,24 +163,6 @@ namespace yellowyears.uGoldSrc.Components
             {
                 Debug.Log($"Combined {originalMeshCount} mesh filters into {combinedMeshCount} in {mapName}");
             }
-        }
-
-        public void SeparateByLooseParts()
-        {
-            for (int i = 0; i < combinedMeshFilters.Count; i++)
-            {
-                // Find nearest vertex
-                var mesh = combinedMeshFilters[i].sharedMesh;
-
-                var originalTriangles = mesh.triangles.ToList();
-            }
-        }
-
-        public void ExportMap()
-        {
-            var savePath = Path.Combine("Assets/_uGoldSrc", "maps");
-            var prefabSavePath = Path.Combine(savePath, "prefabs");
-            var modelSavePath = Path.Combine(savePath, "models");
         }
     }
 }

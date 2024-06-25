@@ -7,16 +7,11 @@
         <ui:TextField picking-mode="Ignore" label="Map Name" readonly="true" binding-path="mapName" name="MapName" class="settings-section-option unity-disabled" />
     </ui:VisualElement>
     <ui:VisualElement class="settings-section">
-        <ui:Label text="Map Actions" display-tooltip-when-elided="true" class="settings-section-header" />
-        <ui:Button text="Set Map Layers and Flags" display-tooltip-when-elided="true" max-length="100" name="SetLayersAndFlags" class="settings-section-option" />
-    </ui:VisualElement>
-    <ui:VisualElement class="settings-section">
         <ui:Label text="Map Mesh Actions" display-tooltip-when-elided="true" class="settings-section-header" />
         <ui:Button text="Combine Meshes By Material" display-tooltip-when-elided="true" max-length="100" name="CombineByMaterial" class="settings-section-option" />
-        <ui:Button text="Separate Meshes By Loose Parts" display-tooltip-when-elided="true" max-length="100" name="SeparateByLooseParts" class="settings-section-option" />
     </ui:VisualElement>
     <ui:VisualElement class="settings-section">
-        <ui:Label text="Map Model Actions" display-tooltip-when-elided="true" class="settings-section-header" />
-        <ui:Button text="Export Map" display-tooltip-when-elided="true" name="ExportMap" />
+        <ui:Label text="Map Actions" display-tooltip-when-elided="true" class="settings-section-header" />
+        <ui:Button text="Set Map Layers and Flags" display-tooltip-when-elided="true" max-length="100" name="SetLayersAndFlags" class="settings-section-option" />
     </ui:VisualElement>
 </ui:UXML>
