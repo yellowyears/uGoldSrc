@@ -293,26 +293,20 @@ namespace yellowyears.uGoldSrc.Formats.BSP.Importer
         {
             var vertices = new Vector3[face.NumEdges];
             // Create the array of vertices from the edges
-            for (int i = 0, k = face.FirstEdge; i < face.NumEdges; i++, k++)
+            for (int i = 0; i < face.NumEdges; i++)
             {
-                // If the value of the surfedge is positive, the first vertex of the edge is used as vertex for rendering the face, otherwise, the value is multiplied by -1 and the second vertex of the indexed edge is used. 
-                if (map.SurfEdgeLump.SurfEdges[face.FirstEdge + i].SurfEdgeIndex < 0)
-                {
-                    vertices[i] = map.VertexLump.Vertices[map.EdgeLump.Edges[Mathf.Abs(map.SurfEdgeLump.SurfEdges[k].SurfEdgeIndex)].Vertices[0]].VertexPosition;
-                }
-                else
-                {
-                    vertices[i] = map.VertexLump.Vertices[map.EdgeLump.Edges[map.SurfEdgeLump.SurfEdges[k].SurfEdgeIndex].Vertices[1]].VertexPosition;
-                }
+                var edgeIndex = map.SurfEdgeLump.SurfEdges[face.FirstEdge + i].SurfEdgeIndex;
+                var edge = map.EdgeLump.Edges[Mathf.Abs(edgeIndex)];
+                vertices[i] = map.VertexLump.Vertices[edgeIndex > 0 ? edge.Start : edge.End].VertexPosition;
             }
 
             // Triangulate the mesh
             var triangles = new int[(face.NumEdges - 2) * 3];
-            for (int i = 1, k = 0; i < vertices.Length - 1; i++, k += 3)
+            for (int i = 1, j = 0; i < vertices.Length - 1; i++, j += 3)
             {
-                triangles[k] = 0;
-                triangles[k + 1] = i;
-                triangles[k + 2] = i + 1;
+                triangles[j] = 0;
+                triangles[j + 1] = i;
+                triangles[j + 2] = i + 1;
             }
 
             // Get UVs from the TextureInfo data
@@ -339,10 +333,6 @@ namespace yellowyears.uGoldSrc.Formats.BSP.Importer
 
             faceMesh.RecalculateNormals();
 
-
-#if UNITY_EDITOR
-            //Unwrapping.GenerateSecondaryUVSet(faceMesh);
-#endif
             return faceMesh;
         }
     }

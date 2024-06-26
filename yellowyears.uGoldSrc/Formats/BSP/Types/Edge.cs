@@ -4,15 +4,21 @@ namespace yellowyears.uGoldSrc.Formats.BSP.Types
     {
 
         /// <summary>
-        /// Indices into vertex array, start and end vertex
+        /// Index of the start edge into the vertex array
         /// </summary>
-        public ushort[] Vertices { get; private set; } = new ushort[2];
+        public ushort Start { get; private set; }
+
+        /// <summary>
+        /// Index of the end edge into the vertex array
+        /// </summary>
+        public ushort End { get; private set; }
 
         public const int TotalSize = 4;
 
-        public Edge(ushort[] vertices)
+        public Edge(ushort start, ushort end)
         {
-            Vertices = vertices;
+            Start = start;
+            End = end;
         }
     }
 }

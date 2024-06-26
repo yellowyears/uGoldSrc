@@ -55,11 +55,14 @@ namespace yellowyears.uGoldSrc.Formats.BSP.Importer
                 var vertexLump = ReadVertices(reader, header.Entries[3], unitScale);
                 var textureInfoLump = ReadTextureInfos(reader, header.Entries[6]);
                 var faceLump = ReadFaces(reader, header.Entries[7]);
-                var lightmapLump = ReadLightmaps(reader, header.Entries[8]);
+
                 var leafLump = ReadLeaves(reader, header.Entries[10]);
+                var markSurfaceLump = ReadMarkSurfaces(reader, header.Entries[11]);
                 var edgeLump = ReadEdges(reader, header.Entries[12]);
                 var surfEdgeLump = ReadSurfEdges(reader, header.Entries[13]);
                 var modelLump = ReadModels(reader, header.Entries[14]);
+
+                var lightmapLump = ReadLightmaps(reader, header.Entries[8], textureInfoLump, vertexLump, faceLump, edgeLump, surfEdgeLump);
 
                 reader.Close();
 
@@ -71,7 +74,9 @@ namespace yellowyears.uGoldSrc.Formats.BSP.Importer
                     vertexLump,
                     textureInfoLump,
                     faceLump,
+                    lightmapLump,
                     leafLump,
+                    markSurfaceLump,
                     edgeLump,
                     surfEdgeLump,
                     modelLump);
@@ -296,23 +301,69 @@ namespace yellowyears.uGoldSrc.Formats.BSP.Importer
             return faceLump;
         }
 
-        private static LightmapLump ReadLightmaps(BinaryReader reader, HeaderEntry headerEntry)
+        private static LightmapLump ReadLightmaps(BinaryReader reader, HeaderEntry headerEntry, TextureInfoLump textureInfoLump, VertexLump vertexLump, FaceLump faceLump, EdgeLump edgeLump, SurfEdgeLump surfEdgeLump)
         {
             var lightmapLump = new LightmapLump(headerEntry);
 
             // Access the LUMP_LIGHTING from the header
             reader.BaseStream.Position = lightmapLump.HeaderEntry.Offset;
 
-            // Fill the lightmaps array
-            Debug.Log(lightmapLump.HeaderEntry.Offset);
-            Debug.Log(lightmapLump.HeaderEntry.Length);
+            for (int i = 0; i < faceLump.Faces.Count; i++)
+            {
+                var face = faceLump.Faces[i];
+                var textureInfo = textureInfoLump.TextureInfos[face.TextureInfoIndex];
 
-            Color32[] lightmapPixels = new Color32[lightmapLump.HeaderEntry.Length / 3];
+                if(textureInfo.Flags == 1 || face.Styles[0] == 255)
+                {
+                    // Face has no lightmap or is fullbright 
+                    continue;
+                }
+                else
+                {
+                    // Get the lightmap size
+
+                    var uvs = new List<Vector2>();
+                    var vertices = new Vector3[face.NumEdges];
+                    for (int j = 0; j < face.NumEdges; j++)
+                    {
+                        var edgeIndex = surfEdgeLump.SurfEdges[face.FirstEdge + j].SurfEdgeIndex;
+                        var edge = edgeLump.Edges[Mathf.Abs(edgeIndex)];
+                        vertices[j] = vertexLump.Vertices[edgeIndex > 0 ? edge.Start : edge.End].VertexPosition;
+
+                        // Get the extents from each vertex and the textureInfo's scale
+                        var u = Vector3.Dot(vertices[j], textureInfo.XScale);
+                        var v = Vector3.Dot(vertices[j], textureInfo.YScale);
+
+                        uvs.Add(new Vector2(u, v));
+                    }
+
+                    var minU = uvs.Min(x => x.x);
+                    var maxU = uvs.Min(x => x.x);
+
+                    var minV = uvs.Min(x => x.y);
+                    var maxV = uvs.Max(x => x.y);
+
+                    // Get the width and height by expanding the extents to nearest multiple of 16 and add one for bottom/right edges
+                    var width = Mathf.Ceil(maxU / 16) - Mathf.Floor(minU / 16) + 1;
+                    var height = Mathf.Ceil(maxV / 16) - Mathf.Floor(minV / 16) + 1;
+
+                    // Figure out how many lightmaps to read for each face
+
+                    Debug.Log(width);
+                    Debug.Log(height);
+                }
+            }
+
+            // Fill the lightmaps array
+            var lightmapPixels = new Color32[lightmapLump.HeaderEntry.Length / 3];
 
             for(int i = 0; i < lightmapPixels.Length; i++)
             {
                 lightmapPixels[i] = new Color32(reader.ReadByte(), reader.ReadByte(), reader.ReadByte(), 255);
             }
+
+            var lightmap = new Lightmap(lightmapPixels);
+            lightmapLump.Lightmaps.Add(lightmap);
 
             return lightmapLump;
         }
@@ -334,6 +385,22 @@ namespace yellowyears.uGoldSrc.Formats.BSP.Importer
             return leafLump;
         }
 
+        private static MarkSurfaceLump ReadMarkSurfaces(BinaryReader reader, HeaderEntry headerEntry)
+        {
+            var markSurfaceLump = new MarkSurfaceLump(headerEntry);
+
+            // Access the LUMP_MARKSURFACES from the header
+            reader.BaseStream.Position = markSurfaceLump.HeaderEntry.Offset;
+
+            for(int i = 0; i < markSurfaceLump.NumEntries; i++)
+            {
+                var markSurface = new MarkSurface(reader.ReadInt16());
+                markSurfaceLump.MarkSurfaces.Add(markSurface);
+            }
+
+            return markSurfaceLump;
+        }
+
         private static EdgeLump ReadEdges(BinaryReader reader, HeaderEntry headerEntry)
         {
             var edgeLump = new EdgeLump(headerEntry);
@@ -343,7 +410,7 @@ namespace yellowyears.uGoldSrc.Formats.BSP.Importer
 
             for (int i = 0; i < edgeLump.NumEntries; i++)
             {
-                var edge = new Edge(new ushort[] { reader.ReadUInt16(), reader.ReadUInt16() });
+                var edge = new Edge(reader.ReadUInt16(), reader.ReadUInt16());
                 edgeLump.Edges.Add(edge);
             }
 
