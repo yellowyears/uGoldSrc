@@ -8,6 +8,7 @@ using UnityEditor;
 
 namespace yellowyears.uGoldSrc.Components
 {
+    [AddComponentMenu("uGoldSrc/Map Info")]
     public class MapInfo : MonoBehaviour
     {
 
