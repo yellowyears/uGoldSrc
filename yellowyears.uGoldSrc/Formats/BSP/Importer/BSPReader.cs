@@ -14,17 +14,15 @@ namespace yellowyears.uGoldSrc.Formats.BSP.Importer
 {
     public static class BSPReader
     {
-        private static BinaryReader _reader;
-
         public static BSP30 Read(string rootPath, string modName, string mapName, float unitScale)
         {
             // Create a new BinaryReader with the map file
             var mapPath = Path.Combine(rootPath, modName + "\\maps", mapName + ".bsp");
 
-            using (_reader = new BinaryReader(File.Open(mapPath, FileMode.Open)))
+            using (BinaryReader reader = new BinaryReader(File.Open(mapPath, FileMode.Open)))
             {
                 // Use this BinaryReader to get data from the header
-                var header = new BSPHeader(_reader, mapName, unitScale);
+                var header = new BSPHeader(reader, mapName, unitScale);
 
                 if (header.Version != 30)
                 {
@@ -33,11 +31,11 @@ namespace yellowyears.uGoldSrc.Formats.BSP.Importer
                 }
 
                 // Try to detect a Blue Shift map (one where the plane and entity lumps are flipped)
-                var originalOffset = _reader.BaseStream.Position;
-                _reader.BaseStream.Position = header.Entries[1].Offset;
+                var originalOffset = reader.BaseStream.Position;
+                reader.BaseStream.Position = header.Entries[1].Offset;
 
                 // If the entity lump's length divides into the size of a plane and the plane lump starts with a { then the lumps are most likely flipped.
-                if(header.Entries[0].Length % BSP.Types.Plane.TotalSize == 0 && _reader.ReadChar() == '{')
+                if (header.Entries[0].Length % BSP.Types.Plane.TotalSize == 0 && reader.ReadChar() == '{')
                 {
                     Debug.Log($"Map where entity and plane lumps are flipped detected ({header.Name}), fixing (this is normal for Half-Life: Blue Shift maps).");
 
@@ -49,23 +47,26 @@ namespace yellowyears.uGoldSrc.Formats.BSP.Importer
                 }
 
                 // Reset the position of the reader (not exactly necessary since lump readers set it anyways)
-                _reader.BaseStream.Position = originalOffset;
+                reader.BaseStream.Position = originalOffset;
 
-                var entityLump = ReadEntities(header.Entries[0]);
-                var planeLump = ReadPlanes(header.Entries[1]);
-                var mipTextureLump = ReadMipTextures(header.Entries[2], rootPath, modName, entityLump);
-                var vertexLump = ReadVertices(header.Entries[3], unitScale);
-                var textureInfoLump = ReadTextureInfos(header.Entries[6], unitScale);
-                var faceLump = ReadFaces(header.Entries[7]);
-                var lightmapLump = ReadLightmaps(header.Entries[8]);
-                var leafLump = ReadLeaves(header.Entries[10]);
-                var edgeLump = ReadEdges(header.Entries[12]);
-                var surfEdgeLump = ReadSurfEdges(header.Entries[13]);
-                var modelLump = ReadModels(header.Entries[14]);
+                var entityLump = ReadEntities(reader, header.Entries[0]);
+                var planeLump = ReadPlanes(reader, header.Entries[1]);
+                var mipTextureLump = ReadMipTextures(reader, header.Entries[2], rootPath, modName, entityLump);
+                var vertexLump = ReadVertices(reader, header.Entries[3], unitScale);
+                var textureInfoLump = ReadTextureInfos(reader, header.Entries[6]);
+                var faceLump = ReadFaces(reader, header.Entries[7]);
 
-                _reader.Close();
+                var leafLump = ReadLeaves(reader, header.Entries[10]);
+                var markSurfaceLump = ReadMarkSurfaces(reader, header.Entries[11]);
+                var edgeLump = ReadEdges(reader, header.Entries[12]);
+                var surfEdgeLump = ReadSurfEdges(reader, header.Entries[13]);
+                var modelLump = ReadModels(reader, header.Entries[14]);
 
-                var map = new BSP30 (               
+                var lightmapLump = ReadLightmaps(reader, header.Entries[8], textureInfoLump, vertexLump, faceLump, edgeLump, surfEdgeLump);
+
+                reader.Close();
+
+                var map = new BSP30(
                     header,
                     entityLump,
                     planeLump,
@@ -73,7 +74,9 @@ namespace yellowyears.uGoldSrc.Formats.BSP.Importer
                     vertexLump,
                     textureInfoLump,
                     faceLump,
+                    lightmapLump,
                     leafLump,
+                    markSurfaceLump,
                     edgeLump,
                     surfEdgeLump,
                     modelLump);
@@ -84,15 +87,15 @@ namespace yellowyears.uGoldSrc.Formats.BSP.Importer
 
         #region Lump Readers
 
-        private static EntityLump ReadEntities(HeaderEntry headerEntry)
+        private static EntityLump ReadEntities(BinaryReader reader, HeaderEntry headerEntry)
         {
             var entityLump = new EntityLump(headerEntry);
 
             // Access the LUMP_ENTITIES from the header
-            _reader.BaseStream.Position = entityLump.HeaderEntry.Offset;
+            reader.BaseStream.Position = entityLump.HeaderEntry.Offset;
 
             // Read all of the entities
-            var chars = _reader.ReadChars(entityLump.NumEntries).Where(x => x <= 127).ToArray();
+            var chars = reader.ReadChars(entityLump.NumEntries).Where(x => x <= 127).ToArray();
             var rawEntities = new string(chars);
 
             // Split the raw entities by the start { and end }
@@ -150,23 +153,23 @@ namespace yellowyears.uGoldSrc.Formats.BSP.Importer
             return entityLump;
         }
 
-        private static PlaneLump ReadPlanes(HeaderEntry headerEntry)
+        private static PlaneLump ReadPlanes(BinaryReader reader, HeaderEntry headerEntry)
         {
             var planeLump = new PlaneLump(headerEntry);
 
             // Access the LUMP_PLANES from the header
-            _reader.BaseStream.Position = planeLump.HeaderEntry.Offset;
+            reader.BaseStream.Position = planeLump.HeaderEntry.Offset;
 
             for (int i = 0; i < planeLump.NumEntries; i++)
             {
-                var plane = new BSP.Types.Plane(_reader.ReadVector3(), _reader.ReadSingle(), _reader.ReadInt32());
+                var plane = new BSP.Types.Plane(reader.ReadVector3(), reader.ReadSingle(), reader.ReadInt32());
                 planeLump.Planes.Add(plane);
             }
 
             return planeLump;
         }
 
-        private static MipTextureLump ReadMipTextures(HeaderEntry headerEntry, string rootPath, string modName, EntityLump entityLump)
+        private static MipTextureLump ReadMipTextures(BinaryReader reader, HeaderEntry headerEntry, string rootPath, string modName, EntityLump entityLump)
         {
             var mipTextureLump = new MipTextureLump(headerEntry);
 
@@ -181,15 +184,19 @@ namespace yellowyears.uGoldSrc.Formats.BSP.Importer
             for (int i = 0; i < wadFilePaths.Length; i++)
             {
                 var splitWadFilePath = wadFilePaths[i].Split(new char[] { '\\', '/' }, StringSplitOptions.RemoveEmptyEntries);
-                if(splitWadFilePath.Length >= 2)
+                if (splitWadFilePath.Length >= 2)
                 {
-                    if (splitWadFilePath[splitWadFilePath.Length - 2] == "barney")
+                    // WAD Aliases prevent any errors where the name of the WAD in the worldspawn entity is different to what it is called in the install
+                    var wadFolderName = splitWadFilePath[splitWadFilePath.Length - 2];
+                    var wadFolderAlias = Settings.Instance.wadFolderAliases.Where(x => x.originalFolderName == wadFolderName).FirstOrDefault();
+
+                    if (wadFolderAlias != null)
                     {
-                        // Temporary fix for incorrect folder name in worldspawn
-                        splitWadFilePath[splitWadFilePath.Length - 2] = "bshift";
+                        wadFolderName = wadFolderAlias.actualFolderName;
                     }
 
-                    wadFilePaths[i] = splitWadFilePath[splitWadFilePath.Length - 2] + "\\" + splitWadFilePath[splitWadFilePath.Length - 1];
+                    // Set the wad's filepath to be the wad folder and the wad name
+                    wadFilePaths[i] = wadFolderName + "\\" + splitWadFilePath[splitWadFilePath.Length - 1];
                 }
                 else
                 {
@@ -209,21 +216,21 @@ namespace yellowyears.uGoldSrc.Formats.BSP.Importer
             }
 
             // Access the LUMP_TEXTURES from the header
-            _reader.BaseStream.Position = mipTextureLump.HeaderEntry.Offset;
+            reader.BaseStream.Position = mipTextureLump.HeaderEntry.Offset;
 
-            int numTextures = (int)_reader.ReadUInt32();
+            int numTextures = (int)reader.ReadUInt32();
 
-            var previousReaderPosition = _reader.BaseStream.Position; // Used to switch between mip offset and texture offset
+            var previousReaderPosition = reader.BaseStream.Position; // Used to switch between mip offset and texture offset
             int[] mipTextureOffsets = new int[numTextures];
             for (int i = 0; i < numTextures; i++)
             {
                 // Get offsets of the mip textures
-                _reader.BaseStream.Position = previousReaderPosition;
-                mipTextureOffsets[i] = mipTextureLump.HeaderEntry.Offset + _reader.ReadInt32();
-                previousReaderPosition = _reader.BaseStream.Position; // This is so the logic can be in one loop despite the position moving around
+                reader.BaseStream.Position = previousReaderPosition;
+                mipTextureOffsets[i] = mipTextureLump.HeaderEntry.Offset + reader.ReadInt32();
+                previousReaderPosition = reader.BaseStream.Position; // This is so the logic can be in one loop despite the position moving around
 
-                _reader.BaseStream.Position = mipTextureOffsets[i];
-                var textureName = new string(_reader.ReadChars(16, true));
+                reader.BaseStream.Position = mipTextureOffsets[i];
+                var textureName = new string(reader.ReadChars(16, true));
 
                 // Instead of reading the texture and differentiating between bsp/wad, just load it from the wadMipTextures list
                 for (int j = 0; j < wadDirectoryEntries.Count; j++)
@@ -244,32 +251,32 @@ namespace yellowyears.uGoldSrc.Formats.BSP.Importer
             return mipTextureLump;
         }
 
-        private static VertexLump ReadVertices(HeaderEntry headerEntry, float mapScale)
+        private static VertexLump ReadVertices(BinaryReader reader, HeaderEntry headerEntry, float mapScale)
         {
             var vertexLump = new VertexLump(headerEntry);
 
             // Access the LUMP_VERTICES from the header
-            _reader.BaseStream.Position = vertexLump.HeaderEntry.Offset;
+            reader.BaseStream.Position = vertexLump.HeaderEntry.Offset;
 
             for (int i = 0; i < vertexLump.NumEntries; i++)
             {
-                var vertex = new Vertex(_reader.ReadVector3(), mapScale);
+                var vertex = new Vertex(reader.ReadVector3(), mapScale);
                 vertexLump.Vertices.Add(vertex);
             }
 
             return vertexLump;
         }
 
-        private static TextureInfoLump ReadTextureInfos(HeaderEntry headerEntry, float mapScale)
+        private static TextureInfoLump ReadTextureInfos(BinaryReader reader, HeaderEntry headerEntry)
         {
             var textureInfoLump = new TextureInfoLump(headerEntry);
 
             // Access the LUMP_TEXINFO from the header
-            _reader.BaseStream.Position = textureInfoLump.HeaderEntry.Offset;
+            reader.BaseStream.Position = textureInfoLump.HeaderEntry.Offset;
 
             for (int i = 0; i <= textureInfoLump.NumEntries; i++)
             {
-                var textureInfo = new TextureInfo(_reader.ReadVector3(), _reader.ReadSingle(), _reader.ReadVector3(), _reader.ReadSingle(), _reader.ReadUInt32(), _reader.ReadUInt32());
+                var textureInfo = new TextureInfo(reader.ReadVector3(), reader.ReadSingle(), reader.ReadVector3(), reader.ReadSingle(), reader.ReadUInt32(), reader.ReadUInt32());
 
                 textureInfoLump.TextureInfos.Add(textureInfo);
             }
@@ -277,100 +284,171 @@ namespace yellowyears.uGoldSrc.Formats.BSP.Importer
             return textureInfoLump;
         }
 
-        private static FaceLump ReadFaces(HeaderEntry headerEntry)
+        private static FaceLump ReadFaces(BinaryReader reader, HeaderEntry headerEntry)
         {
             var faceLump = new FaceLump(headerEntry);
 
             // Access the LUMP_FACES from the header
-            _reader.BaseStream.Position = faceLump.HeaderEntry.Offset;
+            reader.BaseStream.Position = faceLump.HeaderEntry.Offset;
 
             // Fill the faces array
             for (int i = 0; i < faceLump.NumEntries; i++)
             {
-                var face = new Face(_reader.ReadUInt16(), _reader.ReadUInt16(), _reader.ReadUInt32(), _reader.ReadUInt16(), _reader.ReadUInt16(), _reader.ReadBytes(4), _reader.ReadUInt32());
+                var face = new Face(reader.ReadUInt16(), reader.ReadUInt16(), reader.ReadUInt32(), reader.ReadUInt16(), reader.ReadUInt16(), reader.ReadBytes(4), reader.ReadUInt32());
                 faceLump.Faces.Add(face);
             }
 
             return faceLump;
         }
 
-        private static LightmapLump ReadLightmaps(HeaderEntry headerEntry)
+        private static LightmapLump ReadLightmaps(BinaryReader reader, HeaderEntry headerEntry, TextureInfoLump textureInfoLump, VertexLump vertexLump, FaceLump faceLump, EdgeLump edgeLump, SurfEdgeLump surfEdgeLump)
         {
             var lightmapLump = new LightmapLump(headerEntry);
 
             // Access the LUMP_LIGHTING from the header
-            _reader.BaseStream.Position = lightmapLump.HeaderEntry.Offset;
+            reader.BaseStream.Position = lightmapLump.HeaderEntry.Offset;
+
+            for (int i = 0; i < faceLump.Faces.Count; i++)
+            {
+                var face = faceLump.Faces[i];
+                var textureInfo = textureInfoLump.TextureInfos[face.TextureInfoIndex];
+
+                if(textureInfo.Flags == 1 || face.Styles[0] == 255)
+                {
+                    // Face has no lightmap or is fullbright 
+                    continue;
+                }
+                else
+                {
+                    // Get the lightmap size
+
+                    var uvs = new List<Vector2>();
+                    var vertices = new Vector3[face.NumEdges];
+                    for (int j = 0; j < face.NumEdges; j++)
+                    {
+                        var edgeIndex = surfEdgeLump.SurfEdges[face.FirstEdge + j].SurfEdgeIndex;
+                        var edge = edgeLump.Edges[Mathf.Abs(edgeIndex)];
+                        vertices[j] = vertexLump.Vertices[edgeIndex > 0 ? edge.Start : edge.End].VertexPosition;
+
+                        // Get the extents from each vertex and the textureInfo's scale
+                        var u = Vector3.Dot(vertices[j], textureInfo.XScale);
+                        var v = Vector3.Dot(vertices[j], textureInfo.YScale);
+
+                        uvs.Add(new Vector2(u, v));
+                    }
+
+                    var minU = uvs.Min(x => x.x);
+                    var maxU = uvs.Min(x => x.x);
+
+                    var minV = uvs.Min(x => x.y);
+                    var maxV = uvs.Max(x => x.y);
+
+                    // Get the width and height by expanding the extents to nearest multiple of 16 and add one for bottom/right edges
+                    var width = Mathf.Ceil(maxU / 16) - Mathf.Floor(minU / 16) + 1;
+                    var height = Mathf.Ceil(maxV / 16) - Mathf.Floor(minV / 16) + 1;
+
+                    // Figure out how many lightmaps to read for each face
+
+                    Debug.Log(width);
+                    Debug.Log(height);
+                }
+            }
 
             // Fill the lightmaps array
+            var lightmapPixels = new Color32[lightmapLump.HeaderEntry.Length / 3];
+
+            for(int i = 0; i < lightmapPixels.Length; i++)
+            {
+                lightmapPixels[i] = new Color32(reader.ReadByte(), reader.ReadByte(), reader.ReadByte(), 255);
+            }
+
+            var lightmap = new Lightmap(lightmapPixels);
+            lightmapLump.Lightmaps.Add(lightmap);
 
             return lightmapLump;
         }
 
-        private static LeafLump ReadLeaves(HeaderEntry headerEntry)
+        private static LeafLump ReadLeaves(BinaryReader reader, HeaderEntry headerEntry)
         {
             var leafLump = new LeafLump(headerEntry);
 
             // Access the LUMP_LEAVES from the header
-            _reader.BaseStream.Position = leafLump.HeaderEntry.Offset;
+            reader.BaseStream.Position = leafLump.HeaderEntry.Offset;
 
             // Fill the leaves array
             for (int i = 0; i < leafLump.NumEntries; i++)
             {
-                var leaf = new Leaf(_reader.ReadInt32(), _reader.ReadInt32(), _reader.ReadVector3(readShorts: true), _reader.ReadVector3(readShorts: true), _reader.ReadUInt16(), _reader.ReadUInt16(), _reader.ReadBytes(4));
+                var leaf = new Leaf(reader.ReadInt32(), reader.ReadInt32(), reader.ReadVector3(readShorts: true), reader.ReadVector3(readShorts: true), reader.ReadUInt16(), reader.ReadUInt16(), reader.ReadBytes(4));
                 leafLump.Leaves.Add(leaf);
             }
 
             return leafLump;
         }
 
-        private static EdgeLump ReadEdges(HeaderEntry headerEntry)
+        private static MarkSurfaceLump ReadMarkSurfaces(BinaryReader reader, HeaderEntry headerEntry)
+        {
+            var markSurfaceLump = new MarkSurfaceLump(headerEntry);
+
+            // Access the LUMP_MARKSURFACES from the header
+            reader.BaseStream.Position = markSurfaceLump.HeaderEntry.Offset;
+
+            for(int i = 0; i < markSurfaceLump.NumEntries; i++)
+            {
+                var markSurface = new MarkSurface(reader.ReadInt16());
+                markSurfaceLump.MarkSurfaces.Add(markSurface);
+            }
+
+            return markSurfaceLump;
+        }
+
+        private static EdgeLump ReadEdges(BinaryReader reader, HeaderEntry headerEntry)
         {
             var edgeLump = new EdgeLump(headerEntry);
 
             // Access the LUMP_EDGES from the header
-            _reader.BaseStream.Position = edgeLump.HeaderEntry.Offset;
+            reader.BaseStream.Position = edgeLump.HeaderEntry.Offset;
 
             for (int i = 0; i < edgeLump.NumEntries; i++)
             {
-                var edge = new Edge(new ushort[] { _reader.ReadUInt16(), _reader.ReadUInt16() });
+                var edge = new Edge(reader.ReadUInt16(), reader.ReadUInt16());
                 edgeLump.Edges.Add(edge);
             }
 
             return edgeLump;
-        }        
-        
-        private static SurfEdgeLump ReadSurfEdges(HeaderEntry headerEntry)
+        }
+
+        private static SurfEdgeLump ReadSurfEdges(BinaryReader reader, HeaderEntry headerEntry)
         {
             var surfEdgeLump = new SurfEdgeLump(headerEntry);
 
             // Access the LUMP_SURFEDGES from the header
-            _reader.BaseStream.Position = surfEdgeLump.HeaderEntry.Offset;
+            reader.BaseStream.Position = surfEdgeLump.HeaderEntry.Offset;
 
-            for(int i = 0; i < surfEdgeLump.NumEntries; i++)
+            for (int i = 0; i < surfEdgeLump.NumEntries; i++)
             {
-                var surfEdge = new SurfEdge(_reader.ReadInt32());
+                var surfEdge = new SurfEdge(reader.ReadInt32());
                 surfEdgeLump.SurfEdges.Add(surfEdge);
             }
 
             return surfEdgeLump;
         }
 
-        private static ModelLump ReadModels(HeaderEntry headerEntry)
+        private static ModelLump ReadModels(BinaryReader reader, HeaderEntry headerEntry)
         {
             var modelLump = new ModelLump(headerEntry);
 
             // Access the LUMP_MODELS from the header
-            _reader.BaseStream.Position = modelLump.HeaderEntry.Offset;
+            reader.BaseStream.Position = modelLump.HeaderEntry.Offset;
 
-            for(int i = 0; i < modelLump.NumEntries; i++)
+            for (int i = 0; i < modelLump.NumEntries; i++)
             {
-                var model = new Model(_reader.ReadVector3(), _reader.ReadVector3(), _reader.ReadVector3(), new int[] { _reader.ReadInt32(), _reader.ReadInt32(), _reader.ReadInt32(), _reader.ReadInt32() }, _reader.ReadInt32(), _reader.ReadInt32(), _reader.ReadInt32());
+                var model = new Model(reader.ReadVector3(), reader.ReadVector3(), reader.ReadVector3(), new int[] { reader.ReadInt32(), reader.ReadInt32(), reader.ReadInt32(), reader.ReadInt32() }, reader.ReadInt32(), reader.ReadInt32(), reader.ReadInt32());
                 modelLump.Models.Add(model);
             }
 
             return modelLump;
         }
-    }
 
-    #endregion
+        #endregion
+    }
 }

@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using UnityEngine;
 
@@ -9,6 +8,7 @@ using UnityEditor;
 
 namespace yellowyears.uGoldSrc.Components
 {
+    [AddComponentMenu("uGoldSrc/Map Info")]
     public class MapInfo : MonoBehaviour
     {
 
@@ -21,10 +21,7 @@ namespace yellowyears.uGoldSrc.Components
         #endregion
 
         public List<GameObject> models = new List<GameObject>();
-
         public List<EntityInfo> entityInfos = new List<EntityInfo>();
-
-        public List<MeshFilter> combinedMeshFilters = new List<MeshFilter>();
 
         public void SetLayersAndFlags()
         {
@@ -125,9 +122,6 @@ namespace yellowyears.uGoldSrc.Components
                     Transform parent = null;
                     string meshName = "Combined Mesh";
 
-                    var isTrigger = false;
-                    var isStatic = false;
-
                     for(int j = 0; j < combine.Length; j++)
                     {
                         originalMeshCount++;
@@ -137,9 +131,6 @@ namespace yellowyears.uGoldSrc.Components
 
                         parent = entry.Value[j].transform.parent;
                         meshName = entry.Value[j].name;
-
-                        isTrigger = entry.Value[j].gameObject.layer == Settings.Instance.triggerLayer;
-                        isStatic = entry.Value[j].gameObject.isStatic;
 
                         DestroyImmediate(entry.Value[j].gameObject);
                     }
@@ -157,25 +148,11 @@ namespace yellowyears.uGoldSrc.Components
                     var combinedMeshRenderer = combinedMeshObject.AddComponent<MeshRenderer>();
                     combinedMeshRenderer.sharedMaterial = entry.Key;
 
-                    combinedMeshObject.isStatic = isStatic;
-
-                    if(isTrigger)
-                    {
-                        combinedMeshObject.layer = Settings.Instance.triggerLayer;
-                        combinedMeshRenderer.enabled = false;
-                    }
-                    else if (isStatic)
-                    {
-                        combinedMeshObject.layer = Settings.Instance.staticLayer;
-                    }
-
                     combinedMeshObject.transform.parent = parent;
 
 #if UNTIY_EDITOR
                     EditorUtility.SetDirty(combinedMeshObject);
 #endif
-
-                    combinedMeshFilters.Add(combinedMeshFilter);
                 }
             }
 
@@ -187,24 +164,6 @@ namespace yellowyears.uGoldSrc.Components
             {
                 Debug.Log($"Combined {originalMeshCount} mesh filters into {combinedMeshCount} in {mapName}");
             }
-        }
-
-        public void SeparateByLooseParts()
-        {
-            for (int i = 0; i < combinedMeshFilters.Count; i++)
-            {
-                // Find nearest vertex
-                var mesh = combinedMeshFilters[i].sharedMesh;
-
-                var originalTriangles = mesh.triangles.ToList();
-            }
-        }
-
-        public void ExportMap()
-        {
-            var savePath = Path.Combine("Assets/_uGoldSrc", "maps");
-            var prefabSavePath = Path.Combine(savePath, "prefabs");
-            var modelSavePath = Path.Combine(savePath, "models");
         }
     }
 }

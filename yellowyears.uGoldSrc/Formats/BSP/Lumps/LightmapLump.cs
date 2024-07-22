@@ -6,7 +6,7 @@ namespace yellowyears.uGoldSrc.Formats.BSP.Lumps
 {
     public class LightmapLump : BSPLump
     {
-        public List<Lightmap> Leaves { get; private set; } = new List<Lightmap>();
+        public List<Lightmap> Lightmaps { get; private set; } = new List<Lightmap>();
 
         public LightmapLump(HeaderEntry headerEntry) : base(headerEntry)
         {
