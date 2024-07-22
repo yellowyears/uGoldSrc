@@ -4,6 +4,7 @@
         <uie:ObjectField label="Lit Shader" allow-scene-objects="false" binding-path="litShader" type="UnityEngine.Shader, UnityEngine" />
         <uie:ObjectField label="Skybox Shader" allow-scene-objects="false" binding-path="skyboxShader" type="UnityEngine.Shader, UnityEngine" />
         <ui:Label text="Import Settings" display-tooltip-when-elided="true" style="font-size: 15px; -unity-font-style: bold;" />
+        <ui:TextField picking-mode="Ignore" label="Skybox Texture Keyword" binding-path="skyboxTextureKeyword" />
         <uie:PropertyField binding-path="wadFolderAliases" />
         <ui:Label text="Map Layers and Static Flags" display-tooltip-when-elided="true" style="font-size: 15px; -unity-font-style: bold;" />
         <uie:LayerField label="Trigger Layer" binding-path="triggerLayer" />

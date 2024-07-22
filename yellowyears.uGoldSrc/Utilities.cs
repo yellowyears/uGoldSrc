@@ -144,17 +144,6 @@ namespace yellowyears.uGoldSrc
                 material.mainTexture = texture; // This texture could come from the mipTexture, but it is better to use a texture returned from GetTexture()
                 material.name = texture.name;
 
-                // { = Masked/Transparent Textures
-                if (material.name.StartsWith("{"))
-                {
-                    // Enable alpha clipping on the material
-                    material.SetFloat("_AlphaClip", 1);
-                    material.SetFloat("_Cutoff", 1);
-                }
-
-                material.SetFloat("_Smoothness", 0);
-                material.SetFloat("_Glossiness", 0);
-
                 // Else, we need to save the new material at the same path
                 if (!Directory.Exists(saveAndLoadPath))
                 {
@@ -194,6 +183,13 @@ namespace yellowyears.uGoldSrc
                 // Create the material from scratch
                 var material = new Material(Settings.Instance.skyboxShader);
                 material.mainTexture = skyboxCubemap;
+
+                // If the skybox texture didn't get assigned, try to use the override
+                if(material.mainTexture == null)
+                {
+                    material.SetTexture(Settings.Instance.skyboxTextureKeyword, skyboxCubemap);
+                }
+
                 material.name = skyboxCubemap.name;
 
                 // Else, we need to save the new material at the same path

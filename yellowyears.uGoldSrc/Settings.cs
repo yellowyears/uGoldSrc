@@ -62,12 +62,14 @@ namespace yellowyears.uGoldSrc
             }
             
             _instance.skyboxShader = Shader.Find("Skybox/Cubemap");
+            _instance.skyboxTextureKeyword = "_Tex";
 
             _instance.wadFolderAliases = new NameAlias[] { new NameAlias("barney", "bshift") };
 
             _instance.triggerEntityClassNames = new string[] { "trigger_auto", "trigger_autosave", "trigger_camera", "trigger_cdaudio", "trigger_changelevel", "trigger_changetarget", "trigger_counter", "trigger_endsection", "trigger_gravity", "trigger_hurt", "trigger_monsterjump", "trigger_multiple", "trigger_once", "trigger_push", "trigger_relay", "trigger_teleport", "trigger_transition", "func_ladder", "func_friction" };
             _instance.nonStaticEntityClassNames = new string[] { "func_rotating", "func_door", "func_door_rotating", "func_platrot", "func_pushable" };
 
+            // Try to find existing layers, but they can be default with no problem
             var triggerLayer = LayerMask.NameToLayer("Trigger");
             _instance.triggerLayer = triggerLayer == -1 ? 0 : triggerLayer;
 
@@ -81,6 +83,8 @@ namespace yellowyears.uGoldSrc
 
         public Shader litShader;
         public Shader skyboxShader;
+
+        public string skyboxTextureKeyword;
 
         #endregion
 

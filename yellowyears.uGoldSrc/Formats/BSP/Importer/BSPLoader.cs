@@ -15,8 +15,8 @@ namespace yellowyears.uGoldSrc.Formats.BSP.Importer
 
         #region Game Settings
 
-        [SerializeField] private string rootPath;
-        [SerializeField] private string modName; // This is the name of the folder which contains the maps e.g valve or bshift
+        [SerializeField] private string modName = "valve";
+        [SerializeField] private string rootPath = "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Half-Life";
 
         #endregion
 
