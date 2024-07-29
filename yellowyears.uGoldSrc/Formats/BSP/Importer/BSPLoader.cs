@@ -23,7 +23,7 @@ namespace yellowyears.uGoldSrc.Formats.BSP.Importer
 
         #region BSP Import Settings
 
-        [SerializeField] private float unitScale = 0.021875f;
+        [SerializeField] private float unitScale = 0.0236f;
         [SerializeField] private FilterMode textureFilterMode = FilterMode.Point;
         [SerializeField] private FilterMode skyboxFilterMode = FilterMode.Bilinear;
         [SerializeField] private LayerMask triggerLayer;
