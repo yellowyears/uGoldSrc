@@ -22,7 +22,6 @@ namespace yellowyears.uGoldSrc.Formats.BSP.Types
 
         public const int TotalSize = 20;
 
-
         public Plane(Vector3 normal, float dist, int type)
         {
             Normal = -normal; // Inverted for GoldSrc
