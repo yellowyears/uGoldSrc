@@ -5,6 +5,8 @@ using System.Linq;
 using UnityEngine;
 using yellowyears.uGoldSrc.Formats.BSP.Types;
 using yellowyears.uGoldSrc.Formats.Common.Types;
+using yellowyears.uGoldSrc.Formats.RAD.Types;
+
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -124,7 +126,7 @@ namespace yellowyears.uGoldSrc
 #endif
         }
 
-        public static Material GetMaterial(Texture2D texture, string saveAndLoadPath)
+        public static Material GetMaterial(Texture2D texture, string saveAndLoadPath, RADEntry radEntry = null)
         {
 #if UNITY_EDITOR
             // saveAndLoadPath should be <export folder>/assets/<folder containing wad>/<wad name>
@@ -148,6 +150,19 @@ namespace yellowyears.uGoldSrc
                 if (!Directory.Exists(saveAndLoadPath))
                 {
                     Directory.CreateDirectory(saveAndLoadPath);
+                }
+
+                if(radEntry != null)
+                {
+                    material.shader = Settings.Instance.emissiveLightShaderOverride;
+
+                    material.SetFloat(Settings.Instance.emissiveEnableKeyword, 1);
+                    material.SetTexture(Settings.Instance.emissiveTextureKeyword, texture);
+
+                    material.SetColor(Settings.Instance.emissiveColourKeyword, radEntry.LightColour);
+                    material.SetFloat(Settings.Instance.emissiveBakedMultiplierKeyword, 200f);
+
+                    material.globalIlluminationFlags = MaterialGlobalIlluminationFlags.BakedEmissive;
                 }
 
                 // Create the material asset at the path

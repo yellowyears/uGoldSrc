@@ -82,15 +82,25 @@ namespace yellowyears.uGoldSrc
         #region Shaders
 
         public Shader litShader;
+
         public Shader skyboxShader;
 
-        public string skyboxTextureKeyword;
+        public Shader emissiveLightShaderOverride;
+
 
         #endregion
 
         #region Import Settings
 
         public NameAlias[] wadFolderAliases;
+
+        public string skyboxTextureKeyword;
+
+        // These keywords are for SLZ URP's LitMAS shader.
+        public string emissiveEnableKeyword;
+        public string emissiveTextureKeyword;
+        public string emissiveColourKeyword;
+        public string emissiveBakedMultiplierKeyword;
 
         #endregion
 

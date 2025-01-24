@@ -1,6 +1,5 @@
 using System;
 using UnityEngine;
-using yellowyears.uGoldSrc.Formats.Common.Types;
 
 namespace yellowyears.uGoldSrc.Formats.RAD.Types
 {
@@ -13,12 +12,6 @@ namespace yellowyears.uGoldSrc.Formats.RAD.Types
         public RADEntry(string textureName, Color lightColour)
         {
             TextureName = textureName;
-            LightColour = lightColour;
-        }
-
-        public RADEntry(MipTexture mipTexture, Color lightColour)
-        {
-            TextureName = mipTexture.TextureName;
             LightColour = lightColour;
         }
     }

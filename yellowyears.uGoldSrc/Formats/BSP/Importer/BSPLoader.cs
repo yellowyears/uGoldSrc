@@ -282,6 +282,16 @@ namespace yellowyears.uGoldSrc.Formats.BSP.Importer
                 }
                 else
                 {
+                    // If the texture is in the rad file then it needs special processing
+                    foreach (var radEntry in Settings.Instance.lightsRad.Entries)
+                    {
+                        if (radEntry.TextureName.ToLower() == texture.name)
+                        {
+                            // Pass in the rad entry which will set all the correct properties for an emissive material
+                            material = Utilities.GetMaterial(texture, assetsPath, radEntry);
+                            break;
+                        }
+                    }
                     material = Utilities.GetMaterial(texture, assetsPath);
                 }
 
