@@ -4,7 +4,10 @@ MonoImporter:
   externalObjects: {}
   serializedVersion: 2
   defaultReferences:
-  - lightsRad: {fileID: 11400000, guid: f843dc2cde5e01947b74bd579c29033d, type: 2}
+  - litShader: {instanceID: 0}
+  - skyboxShader: {instanceID: 0}
+  - emissiveLightShaderOverride: {instanceID: 0}
+  - lightsRad: {fileID: 11400000, guid: d4e5b94e7dadc71479b29f51691000cf, type: 2}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 
