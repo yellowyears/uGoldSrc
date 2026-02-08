@@ -152,7 +152,8 @@ namespace yellowyears.uGoldSrc
                     Directory.CreateDirectory(saveAndLoadPath);
                 }
 
-                if(radEntry != null)
+                // Prevent setting shader to null
+                if (radEntry != null && Settings.Instance.emissiveLightShaderOverride != null)
                 {
                     material.shader = Settings.Instance.emissiveLightShaderOverride;
 
