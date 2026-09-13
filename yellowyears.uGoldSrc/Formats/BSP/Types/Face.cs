@@ -1,3 +1,6 @@
+using System.Collections.Generic;
+using UnityEngine;
+
 namespace yellowyears.uGoldSrc.Formats.BSP.Types
 {
     public class Face
@@ -37,9 +40,16 @@ namespace yellowyears.uGoldSrc.Formats.BSP.Types
         /// </summary>
         public int LightmapOffset { get; private set; }
 
+        public int LightmapIndex { get; set; }
+
+        /// <summary>
+        /// The face's lightmap UVs
+        /// </summary>
+        public List<Vector2> LightmapUVs { get; set; } = new List<Vector2>();
+
         public const int TotalSize = 20;
 
-        public Face(ushort plane, ushort planeSide, uint firstEdge, ushort numEdges, ushort textureInfo, byte[] styles, uint lightmapOffset)
+        public Face(ushort plane, ushort planeSide, uint firstEdge, ushort numEdges, ushort textureInfo, byte[] styles, int lightmapOffset)
         {
             Plane = plane;
             PlaneSide = planeSide;
@@ -47,7 +57,7 @@ namespace yellowyears.uGoldSrc.Formats.BSP.Types
             NumEdges = numEdges;
             TextureInfoIndex = textureInfo;
             Styles = styles;
-            LightmapOffset = (int)lightmapOffset;
+            LightmapOffset = lightmapOffset;
         }
     }
 }

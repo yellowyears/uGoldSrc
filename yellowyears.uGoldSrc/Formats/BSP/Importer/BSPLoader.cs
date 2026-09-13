@@ -3,6 +3,12 @@ using System.IO;
 using UnityEngine;
 using yellowyears.uGoldSrc.Formats.BSP.Types;
 using yellowyears.uGoldSrc.Components;
+using yellowyears.uGoldSrc.Formats.Common.Types;
+using yellowyears.uGoldSrc.Formats.MDL.Types;
+using UnityEditor.Graphs;
+
+
+
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -87,6 +93,8 @@ namespace yellowyears.uGoldSrc.Formats.BSP.Importer
 
             LoadEntitites();
             LoadMapGeometry();
+
+            LoadLightmaps();
 
 #if UNITY_EDITOR
             Selection.activeGameObject = mapGroup.gameObject;
@@ -295,7 +303,17 @@ namespace yellowyears.uGoldSrc.Formats.BSP.Importer
                     material = Utilities.GetMaterial(texture, assetsPath);
                 }
 
+                if (face.LightmapIndex >= 0)
+                {
+                    var lightmap = map.LightmapLump.Lightmaps[face.LightmapIndex];
+                    var lightmapShader = Shader.Find("uGoldSrc/Lightmapped");
+                    material = new Material(lightmapShader);
+                    material.SetTexture("_MainTex", texture);
+                    material.SetTexture("_Lightmap", lightmap.Texture);
+                }
+
                 meshRenderer.sharedMaterial = material;
+
 
                 // Set the object's parent 
                 meshObject.transform.parent = parent.transform;
@@ -314,6 +332,25 @@ namespace yellowyears.uGoldSrc.Formats.BSP.Importer
             }
 
             mapInfo.models.Add(parent.gameObject);
+        }
+
+        private void LoadLightmaps()
+        {
+            //foreach (var lightmap in map.LightmapLump.Lightmaps)
+            //{
+            //    Texture2D texture2D = new Texture2D(lightmap.Pixels.Length / 2, lightmap.Pixels.Length / 2);
+            //    texture2D.SetPixels32(lightmap.Pixels);
+            //    texture2D.Apply();
+
+            //    var texturePath = Path.Combine("Assets/_uGoldSrc/assets", "test");
+
+            //    // Save the texture to a PNG 
+            //    byte[] textureData = texture2D.EncodeToPNG();
+            //    using (var file = File.Open(texturePath, FileMode.Create))
+            //    {
+            //        file.Write(textureData, 0, textureData.Length);
+            //    }
+            //}
         }
 
         private Mesh CreateMesh(Face face)
@@ -346,7 +383,7 @@ namespace yellowyears.uGoldSrc.Formats.BSP.Importer
             for (int i = 0; i < uvs.Length; i++)
             {
                 // uvs.z is negative due to earlier texture flipping for correct saving
-                uvs[i] = new Vector2((Vector3.Dot(vertices[i], textureInfo.XScale) + textureInfo.XShift * unitScale) / (width * unitScale), -(Vector3.Dot(vertices[i], textureInfo.YScale) + textureInfo.YShift * unitScale) / (height * unitScale));
+                uvs[i] = new Vector2((Vector3.Dot(vertices[i], textureInfo.VScale) + textureInfo.SShift * unitScale) / (width * unitScale), -(Vector3.Dot(vertices[i], textureInfo.TScale) + textureInfo.TShift * unitScale) / (height * unitScale));
             }
 
             // Create the mesh
@@ -359,6 +396,11 @@ namespace yellowyears.uGoldSrc.Formats.BSP.Importer
             };
 
             faceMesh.RecalculateNormals();
+
+            if (face.LightmapUVs != null && face.LightmapUVs.Count == vertices.Length)
+            {
+                faceMesh.uv2 = face.LightmapUVs.ToArray();
+            }
 
             return faceMesh;
         }

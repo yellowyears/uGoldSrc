@@ -4,19 +4,19 @@ namespace yellowyears.uGoldSrc.Formats.BSP.Types
 {
     public class TextureInfo
     {
-        public Vector3 XScale { get; private set; }
+        public Vector3 VScale { get; private set; }
 
         /// <summary>
         /// Texture shift in s direction
         /// </summary>
-        public float XShift { get; private set; }
+        public float SShift { get; private set; }
 
-        public Vector3 YScale { get; private set; }
+        public Vector3 TScale { get; private set; }
 
         /// <summary>
         /// Texture shift in t direction
         /// </summary>
-        public float YShift { get; private set; }
+        public float TShift { get; private set; }
 
         /// <summary>
         /// Index into textures array
@@ -30,13 +30,13 @@ namespace yellowyears.uGoldSrc.Formats.BSP.Types
 
         public const int TotalSize = 40;
 
-        public TextureInfo(Vector3 xScale, float xShift, Vector3 yScale, float yShift, uint mipTextureIndex, uint flags)
+        public TextureInfo(Vector3 sScale, float sShift, Vector3 tScale, float tShift, uint mipTextureIndex, uint flags)
         {
-            XScale = xScale;
-            XShift = xShift;
+            VScale = sScale;
+            SShift = sShift;
 
-            YScale = yScale;
-            YShift = yShift;
+            TScale = tScale;
+            TShift = tShift;
 
             MipTextureIndex = (int)mipTextureIndex;
             Flags = (int)flags;

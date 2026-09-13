@@ -115,6 +115,11 @@ namespace yellowyears.uGoldSrc
             return new Vector3(-vector3.x, vector3.z, -vector3.y);
         }
 
+        public static Vector3 UnfixVector3(Vector3 vector3)
+        {
+            return new Vector3(-vector3.x, -vector3.z, vector3.y);
+        }
+
         public static void CreateExportRootFolder()
         {
 #if UNITY_EDITOR

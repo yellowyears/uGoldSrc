@@ -55,12 +55,14 @@ namespace yellowyears.uGoldSrc.Formats.BSP.Importer
                 var vertexLump = ReadVertices(reader, header.Entries[3], unitScale);
                 var textureInfoLump = ReadTextureInfos(reader, header.Entries[6]);
                 var faceLump = ReadFaces(reader, header.Entries[7]);
-                var lightmapLump = ReadLightmaps(reader, header.Entries[8]);
+
                 var leafLump = ReadLeaves(reader, header.Entries[10]);
                 var markSurfaceLump = ReadMarkSurfaces(reader, header.Entries[11]);
                 var edgeLump = ReadEdges(reader, header.Entries[12]);
                 var surfEdgeLump = ReadSurfEdges(reader, header.Entries[13]);
                 var modelLump = ReadModels(reader, header.Entries[14]);
+
+                var lightmapLump = ReadLightmaps(reader, header.Entries[8], mipTextureLump, vertexLump, textureInfoLump, faceLump, edgeLump, surfEdgeLump, unitScale);
 
                 reader.Close();
 
@@ -292,17 +294,99 @@ namespace yellowyears.uGoldSrc.Formats.BSP.Importer
             // Fill the faces array
             for (int i = 0; i < faceLump.NumEntries; i++)
             {
-                var face = new Face(reader.ReadUInt16(), reader.ReadUInt16(), reader.ReadUInt32(), reader.ReadUInt16(), reader.ReadUInt16(), reader.ReadBytes(4), reader.ReadUInt32());
+                var face = new Face(reader.ReadUInt16(), reader.ReadUInt16(), reader.ReadUInt32(), reader.ReadUInt16(), reader.ReadUInt16(), reader.ReadBytes(4), reader.ReadInt32());
                 faceLump.Faces.Add(face);
             }
 
             return faceLump;
         }
 
-        private static LightmapLump ReadLightmaps(BinaryReader reader, HeaderEntry headerEntry)
+        private static LightmapLump ReadLightmaps(BinaryReader reader, HeaderEntry headerEntry, MipTextureLump mipTextureLump, VertexLump vertexLump, TextureInfoLump textureInfoLump, FaceLump faceLump, EdgeLump edgeLump, SurfEdgeLump surfEdgeLump, float unitScale)
         {
-            // Currently not implemented or used, but keeping here incase support is added in the future
-            return null;
+            var lightmapLump = new LightmapLump(headerEntry);
+
+            for (int i = 0; i < faceLump.Faces.Count; i++)
+            {
+                var face = faceLump.Faces[i];
+                var textureInfo = textureInfoLump.TextureInfos[face.TextureInfoIndex];
+                var mipTexture = mipTextureLump.MipTextures[textureInfo.MipTextureIndex];
+
+                if (textureInfo.Flags == 1 || face.Styles[0] == 255 || face.LightmapOffset > lightmapLump.HeaderEntry.Length || face.LightmapOffset < 0)
+                {
+                    continue;
+                }
+
+                var mipTextureWidth = mipTexture.Width;
+                var mipTextureHeight = mipTexture.Height;
+
+                var vScale = textureInfo.VScale;
+                var tScale = textureInfo.TScale;
+
+                var uvs = new List<Vector2>();
+                for (int j = 0; j < face.NumEdges; j++)
+                {
+                    var edgeIndex = surfEdgeLump.SurfEdges[face.FirstEdge + j].SurfEdgeIndex;
+                    var edge = edgeLump.Edges[Mathf.Abs(edgeIndex)];
+                    var vertex = vertexLump.Vertices[edgeIndex > 0 ? edge.Start : edge.End].VertexPosition;
+
+                    var u = (Vector3.Dot(vertex, vScale) + textureInfo.SShift * unitScale) / (mipTextureWidth * unitScale);
+                    var v = (Vector3.Dot(vertex, tScale) + textureInfo.TShift * unitScale) / (mipTextureHeight * unitScale);
+
+                    uvs.Add(new Vector2(u, v));
+                }
+
+                var minU = uvs.Min(x => x.x);
+                var maxU = uvs.Max(x => x.x); 
+
+                var minV = uvs.Min(x => x.y);
+                var maxV = uvs.Max(x => x.y);
+
+                var bMinS = Mathf.FloorToInt((minU * mipTextureWidth) / 16.0f);
+                var bMinT = Mathf.FloorToInt((minV * mipTextureHeight) / 16.0f);
+                var bMaxS = Mathf.CeilToInt((maxU * mipTextureWidth) / 16.0f);
+                var bMaxT = Mathf.CeilToInt((maxV * mipTextureHeight) / 16.0f);
+
+                var lightmapWidth = bMaxS - bMinS + 1;
+                var lightmapHeight = bMaxT - bMinT + 1;
+
+                for (int j = 0; j < uvs.Count; j++)
+                {
+                    float rawS = uvs[j].x * mipTextureWidth;
+                    float rawT = uvs[j].y * mipTextureHeight;
+
+                    float lu = (rawS - bMinS * 16f) / 16f;
+                    float lv = (rawT - bMinT * 16f) / 16f;
+
+                    float u = (lu + 0.5f) / lightmapWidth;
+                    float v = (lv + 0.5f) / lightmapHeight; // no flip — the pixel array was never reversed
+
+                    uvs[j] = new Vector2(u, v);
+                }
+
+                Texture2D lightmapTexture = new Texture2D(lightmapWidth, lightmapHeight, TextureFormat.RGB24, false, false)
+                {
+                    wrapMode = TextureWrapMode.Clamp,
+                    filterMode = FilterMode.Bilinear
+                };
+                Color32[] lightmapColours = new Color32[lightmapWidth * lightmapHeight];
+
+                reader.BaseStream.Position = lightmapLump.HeaderEntry.Offset + face.LightmapOffset;
+                for (int j = 0; j < lightmapColours.Length; j++)
+                {
+                    lightmapColours[j] = new Color32(reader.ReadByte(), reader.ReadByte(), reader.ReadByte(), 255);
+                }
+
+                lightmapTexture.SetPixels32(lightmapColours);
+                lightmapTexture.Apply();
+
+                var lightmap = new Lightmap(lightmapColours, lightmapTexture);
+                lightmapLump.Lightmaps.Add(lightmap);
+
+                face.LightmapUVs = uvs;
+                face.LightmapIndex = lightmapLump.Lightmaps.Count - 1;
+            }
+
+            return lightmapLump;
         }
 
         private static LeafLump ReadLeaves(BinaryReader reader, HeaderEntry headerEntry)
