@@ -309,7 +309,7 @@ namespace yellowyears.uGoldSrc.Formats.BSP.Importer
                     var lightmapShader = Shader.Find("uGoldSrc/Lightmapped");
                     material = new Material(lightmapShader);
                     material.SetTexture("_MainTex", texture);
-                    material.SetTexture("_Lightmap", lightmap.Texture);
+                    material.SetTexture("_Lightmap", map.LightmapLump.LightmapAtlas);
                     material.SetFloat("_LightmapIntensity", 3.0f);
                 }
 

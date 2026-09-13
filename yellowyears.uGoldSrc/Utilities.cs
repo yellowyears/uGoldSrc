@@ -6,6 +6,8 @@ using UnityEngine;
 using yellowyears.uGoldSrc.Formats.BSP.Types;
 using yellowyears.uGoldSrc.Formats.Common.Types;
 using yellowyears.uGoldSrc.Formats.RAD.Types;
+using yellowyears.uGoldSrc.Formats.BSP.Lumps;
+
 
 
 #if UNITY_EDITOR
@@ -279,6 +281,37 @@ namespace yellowyears.uGoldSrc
 #else
             return null;
 #endif
+        }
+
+        public static Texture2D SaveLightmapAtlas(Texture2D lightmapAtlas, string saveAndLoadPath, string mapName)
+        {
+            var texturePath = Path.Combine(saveAndLoadPath, mapName) + ".png";
+
+            // Else, we need to save the texture at the same path
+            if (!Directory.Exists(saveAndLoadPath))
+            {
+                Directory.CreateDirectory(saveAndLoadPath);
+            }
+
+            // Save the texture to a PNG 
+            byte[] textureData = lightmapAtlas.EncodeToPNG();
+            using (var file = File.Open(texturePath, FileMode.Create))
+            {
+                file.Write(textureData, 0, textureData.Length);
+            }
+
+            AssetDatabase.Refresh();
+
+            // Get the texture's import settings to set the texture filter mode
+            TextureImporter importer = AssetImporter.GetAtPath(texturePath) as TextureImporter;
+            //importer.filterMode = filterMode;
+            importer.npotScale = TextureImporterNPOTScale.None;
+            importer.SaveAndReimport();
+
+            // Load the texture to ensure it is the same reference
+            var texture = AssetDatabase.LoadAssetAtPath<Texture2D>(texturePath);
+            return texture;
+
         }
 
         public static Cubemap GetSkyboxCubemap(string skyboxName, FilterMode filterMode, string rootPath, string modName)

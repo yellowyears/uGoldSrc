@@ -62,7 +62,7 @@ namespace yellowyears.uGoldSrc.Formats.BSP.Importer
                 var surfEdgeLump = ReadSurfEdges(reader, header.Entries[13]);
                 var modelLump = ReadModels(reader, header.Entries[14]);
 
-                var lightmapLump = ReadLightmaps(reader, header.Entries[8], mipTextureLump, vertexLump, textureInfoLump, faceLump, edgeLump, surfEdgeLump, unitScale);
+                var lightmapLump = ReadLightmaps(reader, header.Entries[8], mipTextureLump, vertexLump, textureInfoLump, faceLump, edgeLump, surfEdgeLump, unitScale, modName, mapName);
 
                 reader.Close();
 
@@ -301,7 +301,7 @@ namespace yellowyears.uGoldSrc.Formats.BSP.Importer
             return faceLump;
         }
 
-        private static LightmapLump ReadLightmaps(BinaryReader reader, HeaderEntry headerEntry, MipTextureLump mipTextureLump, VertexLump vertexLump, TextureInfoLump textureInfoLump, FaceLump faceLump, EdgeLump edgeLump, SurfEdgeLump surfEdgeLump, float unitScale)
+        private static LightmapLump ReadLightmaps(BinaryReader reader, HeaderEntry headerEntry, MipTextureLump mipTextureLump, VertexLump vertexLump, TextureInfoLump textureInfoLump, FaceLump faceLump, EdgeLump edgeLump, SurfEdgeLump surfEdgeLump, float unitScale, string modName, string mapName)
         {
             var lightmapLump = new LightmapLump(headerEntry);
 
@@ -309,79 +309,52 @@ namespace yellowyears.uGoldSrc.Formats.BSP.Importer
             {
                 var face = faceLump.Faces[i];
                 var textureInfo = textureInfoLump.TextureInfos[face.TextureInfoIndex];
-                var mipTexture = mipTextureLump.MipTextures[textureInfo.MipTextureIndex];
 
                 if (textureInfo.Flags == 1 || face.Styles[0] == 255 || face.LightmapOffset > lightmapLump.HeaderEntry.Length || face.LightmapOffset < 0)
-                {
                     continue;
-                }
-
-                var mipTextureWidth = mipTexture.Width;
-                var mipTextureHeight = mipTexture.Height;
 
                 var vScale = textureInfo.VScale;
                 var tScale = textureInfo.TScale;
 
-                var uvs = new List<Vector2>();
+                var texCoords = new List<Vector2>();
                 for (int j = 0; j < face.NumEdges; j++)
                 {
                     var edgeIndex = surfEdgeLump.SurfEdges[face.FirstEdge + j].SurfEdgeIndex;
                     var edge = edgeLump.Edges[Mathf.Abs(edgeIndex)];
-                    var vertex = vertexLump.Vertices[edgeIndex > 0 ? edge.Start : edge.End].VertexPosition;
+                    var vertex = vertexLump.Vertices[edgeIndex > 0 ? edge.Start : edge.End].VertexPosition; // raw, unscaled
 
                     var s = Vector3.Dot(vertex, vScale) + textureInfo.SShift;
                     var t = Vector3.Dot(vertex, tScale) + textureInfo.TShift;
-
-                    uvs.Add(new Vector2(s, t));
+                    texCoords.Add(new Vector2(s, t));
                 }
 
-                var minS = uvs.Min(x => x.x);
-                var maxS = uvs.Max(x => x.x);
-                var minT = uvs.Min(x => x.y);
-                var maxT = uvs.Max(x => x.y);
-
-                var bMinS = Mathf.FloorToInt(minS / 16.0f);
-                var bMinT = Mathf.FloorToInt(minT / 16.0f);
-                var bMaxS = Mathf.CeilToInt(maxS / 16.0f);
-                var bMaxT = Mathf.CeilToInt(maxT / 16.0f);
+                var bMinS = Mathf.FloorToInt(texCoords.Min(v => v.x) / 16.0f);
+                var bMinT = Mathf.FloorToInt(texCoords.Min(v => v.y) / 16.0f);
+                var bMaxS = Mathf.CeilToInt(texCoords.Max(v => v.x) / 16.0f);
+                var bMaxT = Mathf.CeilToInt(texCoords.Max(v => v.y) / 16.0f);
 
                 var lightmapWidth = bMaxS - bMinS + 1;
                 var lightmapHeight = bMaxT - bMinT + 1;
 
-                for (int j = 0; j < uvs.Count; j++)
+                var localUVs = new List<Vector2>(texCoords.Count);
+                foreach (var tc in texCoords)
                 {
-                    float lu = (uvs[j].x - bMinS * 16f) / 16f;
-                    float lv = (uvs[j].y - bMinT * 16f) / 16f;
-
-                    float u = (lu + 0.5f) / lightmapWidth;
-                    float v = (lv + 0.5f) / lightmapHeight;
-
-                    uvs[j] = new Vector2(u, v);
+                    float lu = (tc.x - bMinS * 16f) / 16f;
+                    float lv = (tc.y - bMinT * 16f) / 16f;
+                    localUVs.Add(new Vector2((lu + 0.5f) / lightmapWidth, (lv + 0.5f) / lightmapHeight));
                 }
 
-                Texture2D lightmapTexture = new Texture2D(lightmapWidth, lightmapHeight, TextureFormat.RGB24, false, false)
-                {
-                    wrapMode = TextureWrapMode.Clamp,
-                    filterMode = FilterMode.Bilinear
-                };
-                Color32[] lightmapColours = new Color32[lightmapWidth * lightmapHeight];
+                var pixelCount = lightmapWidth * lightmapHeight;
+                var pixels = new Color32[pixelCount];
 
                 reader.BaseStream.Position = lightmapLump.HeaderEntry.Offset + face.LightmapOffset;
-                for (int j = 0; j < lightmapColours.Length; j++)
-                {
-                    lightmapColours[j] = new Color32(reader.ReadByte(), reader.ReadByte(), reader.ReadByte(), 255);
-                }
+                for (int j = 0; j < pixelCount; j++)
+                    pixels[j] = new Color32(reader.ReadByte(), reader.ReadByte(), reader.ReadByte(), 255);
 
-                lightmapTexture.SetPixels32(lightmapColours);
-                lightmapTexture.Apply();
-
-                var lightmap = new Lightmap(lightmapColours, lightmapTexture);
-                lightmapLump.Lightmaps.Add(lightmap);
-
-                face.LightmapUVs = uvs;
-                face.LightmapIndex = lightmapLump.Lightmaps.Count - 1;
+                lightmapLump.Lightmaps.Add(new Lightmap(i, lightmapWidth, lightmapHeight, pixels, localUVs));
             }
 
+            lightmapLump.PackLightmapAtlas(faceLump, modName, mapName);
             return lightmapLump;
         }
 
