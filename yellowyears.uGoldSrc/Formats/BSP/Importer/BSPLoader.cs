@@ -310,6 +310,7 @@ namespace yellowyears.uGoldSrc.Formats.BSP.Importer
                     material = new Material(lightmapShader);
                     material.SetTexture("_MainTex", texture);
                     material.SetTexture("_Lightmap", lightmap.Texture);
+                    material.SetFloat("_LightmapIntensity", 3.0f);
                 }
 
                 meshRenderer.sharedMaterial = material;

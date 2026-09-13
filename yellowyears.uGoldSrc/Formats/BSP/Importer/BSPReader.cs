@@ -329,36 +329,34 @@ namespace yellowyears.uGoldSrc.Formats.BSP.Importer
                     var edge = edgeLump.Edges[Mathf.Abs(edgeIndex)];
                     var vertex = vertexLump.Vertices[edgeIndex > 0 ? edge.Start : edge.End].VertexPosition;
 
-                    var u = (Vector3.Dot(vertex, vScale) + textureInfo.SShift * unitScale) / (mipTextureWidth * unitScale);
-                    var v = (Vector3.Dot(vertex, tScale) + textureInfo.TShift * unitScale) / (mipTextureHeight * unitScale);
+                    var originalVertex = vertex / unitScale; // back to raw BSP units
 
-                    uvs.Add(new Vector2(u, v));
+                    var s = Vector3.Dot(originalVertex, vScale) + textureInfo.SShift;
+                    var t = Vector3.Dot(originalVertex, tScale) + textureInfo.TShift;
+
+                    uvs.Add(new Vector2(s, t)); // raw texture-space, NOT normalized by texture width/height
                 }
 
-                var minU = uvs.Min(x => x.x);
-                var maxU = uvs.Max(x => x.x); 
+                var minS = uvs.Min(x => x.x);
+                var maxS = uvs.Max(x => x.x);
+                var minT = uvs.Min(x => x.y);
+                var maxT = uvs.Max(x => x.y);
 
-                var minV = uvs.Min(x => x.y);
-                var maxV = uvs.Max(x => x.y);
-
-                var bMinS = Mathf.FloorToInt((minU * mipTextureWidth) / 16.0f);
-                var bMinT = Mathf.FloorToInt((minV * mipTextureHeight) / 16.0f);
-                var bMaxS = Mathf.CeilToInt((maxU * mipTextureWidth) / 16.0f);
-                var bMaxT = Mathf.CeilToInt((maxV * mipTextureHeight) / 16.0f);
+                var bMinS = Mathf.FloorToInt(minS / 16.0f);
+                var bMinT = Mathf.FloorToInt(minT / 16.0f);
+                var bMaxS = Mathf.CeilToInt(maxS / 16.0f);
+                var bMaxT = Mathf.CeilToInt(maxT / 16.0f);
 
                 var lightmapWidth = bMaxS - bMinS + 1;
                 var lightmapHeight = bMaxT - bMinT + 1;
 
                 for (int j = 0; j < uvs.Count; j++)
                 {
-                    float rawS = uvs[j].x * mipTextureWidth;
-                    float rawT = uvs[j].y * mipTextureHeight;
-
-                    float lu = (rawS - bMinS * 16f) / 16f;
-                    float lv = (rawT - bMinT * 16f) / 16f;
+                    float lu = (uvs[j].x - bMinS * 16f) / 16f;
+                    float lv = (uvs[j].y - bMinT * 16f) / 16f;
 
                     float u = (lu + 0.5f) / lightmapWidth;
-                    float v = (lv + 0.5f) / lightmapHeight; // no flip — the pixel array was never reversed
+                    float v = (lv + 0.5f) / lightmapHeight;
 
                     uvs[j] = new Vector2(u, v);
                 }
