@@ -304,8 +304,14 @@ namespace yellowyears.uGoldSrc
 
             // Get the texture's import settings to set the texture filter mode
             TextureImporter importer = AssetImporter.GetAtPath(texturePath) as TextureImporter;
-            //importer.filterMode = filterMode;
+            importer.textureType = TextureImporterType.Default;
+            importer.sRGBTexture = true;
+            importer.textureCompression = TextureImporterCompression.Uncompressed;
+            importer.mipmapEnabled = false;
+            importer.filterMode = FilterMode.Bilinear;
+            importer.wrapMode = TextureWrapMode.Clamp;
             importer.npotScale = TextureImporterNPOTScale.None;
+            importer.isReadable = false; // true only if you need CPU-side pixel access later
             importer.SaveAndReimport();
 
             // Load the texture to ensure it is the same reference
