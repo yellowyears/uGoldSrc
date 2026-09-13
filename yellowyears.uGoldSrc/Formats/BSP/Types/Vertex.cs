@@ -8,9 +8,9 @@ namespace yellowyears.uGoldSrc.Formats.BSP.Types
 
         public const int TotalSize = 12;
 
-        public Vertex(Vector3 vertexPosition, float mapScale)
+        public Vertex(Vector3 vertexPosition)
         {
-            VertexPosition = vertexPosition * mapScale;
+            VertexPosition = vertexPosition;
         }
     }
 }

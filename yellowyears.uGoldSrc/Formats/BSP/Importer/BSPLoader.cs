@@ -357,12 +357,15 @@ namespace yellowyears.uGoldSrc.Formats.BSP.Importer
         private Mesh CreateMesh(Face face)
         {
             var vertices = new Vector3[face.NumEdges];
-            // Create the array of vertices from the edges
+            var rawVertices = new Vector3[face.NumEdges];
             for (int i = 0; i < face.NumEdges; i++)
             {
                 var edgeIndex = map.SurfEdgeLump.SurfEdges[face.FirstEdge + i].SurfEdgeIndex;
                 var edge = map.EdgeLump.Edges[Mathf.Abs(edgeIndex)];
-                vertices[i] = map.VertexLump.Vertices[edgeIndex > 0 ? edge.Start : edge.End].VertexPosition;
+                var rawVertex = map.VertexLump.Vertices[edgeIndex > 0 ? edge.Start : edge.End].VertexPosition;
+
+                rawVertices[i] = rawVertex;
+                vertices[i] = rawVertex * unitScale; // scale applied exactly once, here
             }
 
             // Triangulate the mesh
@@ -384,7 +387,10 @@ namespace yellowyears.uGoldSrc.Formats.BSP.Importer
             for (int i = 0; i < uvs.Length; i++)
             {
                 // uvs.z is negative due to earlier texture flipping for correct saving
-                uvs[i] = new Vector2((Vector3.Dot(vertices[i], textureInfo.VScale) + textureInfo.SShift * unitScale) / (width * unitScale), -(Vector3.Dot(vertices[i], textureInfo.TScale) + textureInfo.TShift * unitScale) / (height * unitScale));
+                uvs[i] = new Vector2(
+                    (Vector3.Dot(rawVertices[i], textureInfo.VScale) + textureInfo.SShift) / width,
+                    -(Vector3.Dot(rawVertices[i], textureInfo.TScale) + textureInfo.TShift) / height
+                );
             }
 
             // Create the mesh

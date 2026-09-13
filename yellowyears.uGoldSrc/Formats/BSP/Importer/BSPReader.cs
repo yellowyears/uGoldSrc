@@ -52,7 +52,7 @@ namespace yellowyears.uGoldSrc.Formats.BSP.Importer
                 var entityLump = ReadEntities(reader, header.Entries[0]);
                 var planeLump = ReadPlanes(reader, header.Entries[1]);
                 var mipTextureLump = ReadMipTextures(reader, header.Entries[2], rootPath, modName, entityLump);
-                var vertexLump = ReadVertices(reader, header.Entries[3], unitScale);
+                var vertexLump = ReadVertices(reader, header.Entries[3]);
                 var textureInfoLump = ReadTextureInfos(reader, header.Entries[6]);
                 var faceLump = ReadFaces(reader, header.Entries[7]);
 
@@ -251,7 +251,7 @@ namespace yellowyears.uGoldSrc.Formats.BSP.Importer
             return mipTextureLump;
         }
 
-        private static VertexLump ReadVertices(BinaryReader reader, HeaderEntry headerEntry, float mapScale)
+        private static VertexLump ReadVertices(BinaryReader reader, HeaderEntry headerEntry)
         {
             var vertexLump = new VertexLump(headerEntry);
 
@@ -260,7 +260,7 @@ namespace yellowyears.uGoldSrc.Formats.BSP.Importer
 
             for (int i = 0; i < vertexLump.NumEntries; i++)
             {
-                var vertex = new Vertex(reader.ReadVector3(), mapScale);
+                var vertex = new Vertex(reader.ReadVector3());
                 vertexLump.Vertices.Add(vertex);
             }
 
@@ -329,12 +329,10 @@ namespace yellowyears.uGoldSrc.Formats.BSP.Importer
                     var edge = edgeLump.Edges[Mathf.Abs(edgeIndex)];
                     var vertex = vertexLump.Vertices[edgeIndex > 0 ? edge.Start : edge.End].VertexPosition;
 
-                    var originalVertex = vertex / unitScale; // back to raw BSP units
+                    var s = Vector3.Dot(vertex, vScale) + textureInfo.SShift;
+                    var t = Vector3.Dot(vertex, tScale) + textureInfo.TShift;
 
-                    var s = Vector3.Dot(originalVertex, vScale) + textureInfo.SShift;
-                    var t = Vector3.Dot(originalVertex, tScale) + textureInfo.TShift;
-
-                    uvs.Add(new Vector2(s, t)); // raw texture-space, NOT normalized by texture width/height
+                    uvs.Add(new Vector2(s, t));
                 }
 
                 var minS = uvs.Min(x => x.x);
