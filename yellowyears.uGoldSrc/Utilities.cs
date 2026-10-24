@@ -6,9 +6,6 @@ using UnityEngine;
 using yellowyears.uGoldSrc.Formats.BSP.Types;
 using yellowyears.uGoldSrc.Formats.Common.Types;
 using yellowyears.uGoldSrc.Formats.RAD.Types;
-using yellowyears.uGoldSrc.Formats.BSP.Lumps;
-
-
 
 #if UNITY_EDITOR
 using UnityEditor;

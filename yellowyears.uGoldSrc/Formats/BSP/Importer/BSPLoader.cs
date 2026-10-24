@@ -3,12 +3,6 @@ using System.IO;
 using UnityEngine;
 using yellowyears.uGoldSrc.Formats.BSP.Types;
 using yellowyears.uGoldSrc.Components;
-using yellowyears.uGoldSrc.Formats.Common.Types;
-using yellowyears.uGoldSrc.Formats.MDL.Types;
-using UnityEditor.Graphs;
-
-
-
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -84,6 +78,11 @@ namespace yellowyears.uGoldSrc.Formats.BSP.Importer
 
             map = BSPReader.Read(rootPath, modName, mapName, unitScale);
 
+            long readTime = watch.ElapsedMilliseconds;
+            Debug.Log($"uGoldSrc: Read {mapName} in {readTime}ms");
+            Debug.Log($"uGoldSrc: Starting to load {mapName}");
+            watch.Restart();
+
             SetupGroups();
 
             mapInfo = mapGroup.gameObject.AddComponent<MapInfo>();
@@ -94,15 +93,14 @@ namespace yellowyears.uGoldSrc.Formats.BSP.Importer
             LoadEntitites();
             LoadMapGeometry();
 
-            LoadLightmaps();
-
 #if UNITY_EDITOR
             Selection.activeGameObject = mapGroup.gameObject;
             EditorUtility.SetDirty(mapInfo);
 #endif
 
             watch.Stop();
-            Debug.Log($"uGoldSrc: Finished reading {mapName} in {watch.ElapsedMilliseconds}ms");
+            Debug.Log($"uGoldSrc: Loaded {mapName} in {watch.ElapsedMilliseconds}ms");
+            Debug.Log($"uGoldSrc: Total time elapsed for {mapName}: {watch.ElapsedMilliseconds + readTime}ms");
         }
 
         private void SetupGroups()
@@ -335,29 +333,10 @@ namespace yellowyears.uGoldSrc.Formats.BSP.Importer
             mapInfo.models.Add(parent.gameObject);
         }
 
-        private void LoadLightmaps()
-        {
-            //foreach (var lightmap in map.LightmapLump.Lightmaps)
-            //{
-            //    Texture2D texture2D = new Texture2D(lightmap.Pixels.Length / 2, lightmap.Pixels.Length / 2);
-            //    texture2D.SetPixels32(lightmap.Pixels);
-            //    texture2D.Apply();
-
-            //    var texturePath = Path.Combine("Assets/_uGoldSrc/assets", "test");
-
-            //    // Save the texture to a PNG 
-            //    byte[] textureData = texture2D.EncodeToPNG();
-            //    using (var file = File.Open(texturePath, FileMode.Create))
-            //    {
-            //        file.Write(textureData, 0, textureData.Length);
-            //    }
-            //}
-        }
-
         private Mesh CreateMesh(Face face)
         {
             var vertices = new Vector3[face.NumEdges];
-            var rawVertices = new Vector3[face.NumEdges];
+            var rawVertices = new Vector3[face.NumEdges]; // Store non-scaled vertices so UVs can remain accurate
             for (int i = 0; i < face.NumEdges; i++)
             {
                 var edgeIndex = map.SurfEdgeLump.SurfEdges[face.FirstEdge + i].SurfEdgeIndex;
